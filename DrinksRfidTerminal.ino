@@ -12,6 +12,7 @@
 #include <LiquidCrystal.h>
 #include <SipHash_2_4.h>
 #include <SoftwareSerial.h>
+#include <MFRC522.h>
 
 #include "Buttons.h"
 #include "Catalog.h"

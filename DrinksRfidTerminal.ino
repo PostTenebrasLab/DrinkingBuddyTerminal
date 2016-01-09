@@ -13,7 +13,8 @@
 #include <SipHash_2_4.h>
 #include <MFRC522.h>
 
-#include "Buttons.h"
+//#include "Buttons.h"  //Obsolète...à remplacer par encoder
+#include "encoder.h"
 #include "Catalog.h"
 #include "Clock.h"
 #include "Display.h"
@@ -26,7 +27,8 @@
 #define SYNC_PERIOD    600000UL // 10 minutes
 #define IDLE_PERIOD    15000UL  // 15 seconds
 
-static Buttons buttons;
+//static Buttons buttons; //Obsolète...à remplacer par encoder
+static Encoder encoder;
 static Catalog catalog;
 static Clock clock;
 static Display display;
@@ -48,7 +50,8 @@ void setup()
 
     sound.begin();
     http.begin();
-    buttons.begin();
+    //buttons.begin(); //Obsolète...à remplacer par encoder
+    encoder.begin();
     rfid.begin();
 
     //while (!sync())
@@ -64,11 +67,13 @@ void loop()
 
     showSelection();
 
-    if (buttons.leftPressed())
+    //if (buttons.leftPressed())
+    if (encoder.leftPressed())
     {
         moveSelectedProduct(-1);
     }
-    else if (buttons.rightPressed())
+    //else if (buttons.rightPressed())
+    else if (encoder.rightPressed())
     {
         moveSelectedProduct(+1);
     }

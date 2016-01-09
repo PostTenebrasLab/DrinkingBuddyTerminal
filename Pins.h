@@ -9,8 +9,16 @@
 #ifndef _PINS_H
 #define _PINS_H
 
-#define PIN_BTN_LEFT   2
-#define PIN_BTN_RIGHT  3
+#define PIN_BTN_LEFT   2 //obsolète 
+#define PIN_BTN_RIGHT  3 //obsolète
+
+#define ledRED 6
+#define ledGREEN 7  //même que buzzer, faut changer
+#define ledBLUE 8
+
+#define encoder0PinA  2   //Rotary encoder
+#define encoder0PinB  4   //Rotary encoder
+#define encoder0Press 3   //For the button on the rotary  encoder
 
 #define PIN_LCD_LIGHT  23
 #define PIN_LCD_RS     35

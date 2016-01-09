@@ -13,7 +13,6 @@
 #include <SipHash_2_4.h>
 #include <MFRC522.h>
 
-//#include "Buttons.h"  //Obsolète...à remplacer par encoder
 #include "encoder.h"
 #include "Catalog.h"
 #include "Clock.h"
@@ -50,7 +49,6 @@ void setup()
 
     sound.begin();
     http.begin();
-    //buttons.begin(); //Obsolète...à remplacer par encoder
     encoder.begin();
     rfid.begin();
 

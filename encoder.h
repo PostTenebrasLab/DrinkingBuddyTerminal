@@ -2,17 +2,10 @@
 
 #include "Pins.h"
 
-
-
-
 #ifndef _ENCODER_H
 #define _ENCODER_H
 
-
-
 extern bool isLeftButtonPressed, isRightButtonPressed;
-
-
 class Encoder
 {
 public:
@@ -33,7 +26,6 @@ public:
         return true;
     }
 
-    
     bool btnPressed()
     {
         if (pressedButton != PRESS) return false;
@@ -53,15 +45,15 @@ public:
 
     void ledChange(bool RED, bool GREEN, bool BLUE)
     {
-      if(RED) //RED
+      if(RED)
         digitalWrite(ledRED, LOW);
       else
         digitalWrite(ledRED, HIGH);
-      if(GREEN) //GREEN
+      if(GREEN)
         digitalWrite(ledGREEN, LOW);
       else
         digitalWrite(ledGREEN, HIGH);
-      if(BLUE) //BLUE
+      if(BLUE)
         digitalWrite(ledBLUE, LOW);
       else
         digitalWrite(ledBLUE, HIGH);
@@ -85,15 +77,12 @@ public:
     }
 
 
-    
-
 private:
 
     static bool checkBounce();
     static bool checkBounceBtn();
     static void doEncoder();
     static void doBtn();
-    //static void onRightPressed();
 
     static const unsigned long DEBOUNCE_PERIOD = 100;
     static const byte NONE = 0;

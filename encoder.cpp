@@ -9,18 +9,14 @@
 #include <Arduino.h>
 
 #include "encoder.h"
-//#include "Pins.h"
-
-
-
-
+#include "Pins.h"
 
 byte Encoder::pressedButton = Encoder::NONE;
 unsigned long Encoder::blindUntil = 0;
 unsigned long Encoder::blindUntilBtn = 0;
 
- unsigned int Encoder::encoder0Pos = 0;
- unsigned int Encoder::encoder0PosOld = 0;
+unsigned int Encoder::encoder0Pos = 0;
+unsigned int Encoder::encoder0PosOld = 0;
 
 unsigned long Encoder::lastCall = 0;
 
@@ -40,14 +36,12 @@ bool Encoder::checkBounceBtn()
     return ok;
 }
 
-
 void Encoder::doBtn()
 {
-
   if(checkBounceBtn)
-    pressedButton = PRESS;    
-  
+    pressedButton = PRESS;     
 }
+
 void Encoder::doEncoder()
 {
   if (digitalRead(encoder0PinA) == digitalRead(encoder0PinB)) {
@@ -61,18 +55,16 @@ void Encoder::doEncoder()
         pressedButton = LEFT;
       
       encoder0PosOld = encoder0Pos;
-
 }
 
 void Encoder::begin()
 {
-  
   pinMode(encoder0PinA, INPUT); 
   digitalWrite(encoder0PinA, HIGH);       // turn on pullup resistor
   pinMode(encoder0PinB, INPUT); 
   digitalWrite(encoder0PinB, HIGH);       // turn on pullup resistor
   pinMode(encoder0Press, INPUT); 
-  //digitalWrite(encoder0Press, LOW);       // turn on pullup resistor
+  //digitalWrite(encoder0Press, LOW);     // turn on pullup resistor
   
   pinMode(ledRED, OUTPUT);
   digitalWrite(ledRED, HIGH);
@@ -84,10 +76,7 @@ void Encoder::begin()
   digitalWrite(ledBLUE, HIGH);
   
   attachInterrupt(digitalPinToInterrupt(encoder0PinA), doEncoder, CHANGE);  // UNO encoder pin on interrupt 0 - pin 2
-  attachInterrupt(digitalPinToInterrupt(encoder0Press), doBtn, FALLING );  // UNO encoder pin on interrupt 0 - pin 2
-  //Serial.begin (9600);
+  attachInterrupt(digitalPinToInterrupt(encoder0Press), doBtn, FALLING );   // UNO encoder pin on interrupt 0 - pin 2
+
   Serial.println("Start encoder");
-
 }
-
-

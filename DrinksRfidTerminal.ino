@@ -11,7 +11,7 @@
 #include <ArduinoJson.h>
 #include <LiquidCrystal.h>
 #include <SipHash_2_4.h>
-#include <SoftwareSerial.h>
+#include <MFRC522.h>
 
 #include "Buttons.h"
 #include "Catalog.h"
@@ -51,14 +51,15 @@ void setup()
     buttons.begin();
     rfid.begin();
 
-    while (!sync())
-    {
-        delay(5000);
-    }
+    //while (!sync())
+    //{
+    //    delay(5000);
+    //}
 }
 
 void loop()
 {
+  
     unsigned long now = millis();
 
     showSelection();
@@ -107,6 +108,8 @@ void loop()
 
     if (badge)
     {
+        Serial.print("badge found ");
+        Serial.println(badge);
         buy(badge, selectedProduct);
 
         delay(2000);
@@ -116,6 +119,7 @@ void loop()
 
         lastEventTime = millis();
     }    
+    
 }
 
 void moveSelectedProduct(int increment)

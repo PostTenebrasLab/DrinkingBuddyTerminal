@@ -9,7 +9,7 @@
 #ifndef _RFIDREADER_H
 #define _RFIDREADER_H
 
-#include <SoftwareSerial.h>
+#include <MFRC522.h>
 
 #include "Pins.h"
 
@@ -17,13 +17,13 @@ class RfidReader
 {
 public:
 
-    RfidReader() : rfid(PIN_RFID, PIN_RFID)
+    RfidReader() : mfrc522(PIN_RFID_SS, PIN_RFID_RESET)
     {
     }
 
     void begin()
     {
-        rfid.begin(9600);
+        mfrc522.PCD_Init();
     }
 
     char* tryRead();
@@ -34,8 +34,8 @@ private:
     byte parseHexByte(char*);
     byte computeCheckSum(char*);
 
-    SoftwareSerial rfid;
-    char buffer[14];
+    char buffer[21];
+    MFRC522 mfrc522;
 };
 
 #endif

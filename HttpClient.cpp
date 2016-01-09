@@ -23,15 +23,16 @@ void HttpClient::begin()
 {
     delay(100);
 
-    byte mac[6] = MAC_ADDRESS;
-
+    byte mac[6] = {0};
+    byte ip[4] = IP_ADDRESS;
     Serial.println("DHCP...");
 
     // start the Ethernet connection:
-    while (0 == Ethernet.begin(mac)) 
-    {
-        Serial.println("Failed. Retry...");
-    }
+    Ethernet.begin(mac, ip);
+    //while (0 == Ethernet.begin(mac)) 
+    //{
+    //    Serial.println("Failed. Retry...");
+    //}
 
     Serial.print("Address=");
     Serial.println(Ethernet.localIP());
@@ -51,6 +52,7 @@ void HttpClient::begin()
     while (1 != dns.getHostByName(SERVER_NAME, serverIp))
     {
         Serial.println("Failed. Retry...");
+        delay(10);
     }
 
     Serial.print("Address=");
@@ -131,7 +133,7 @@ bool HttpClient::query(const char* request, char* content, int maxContentSize)
     // read content
     readln(content, maxContentSize);
         
-    Serial.println(content);
+    //Serial.println(content);
 
     client.stop();
 

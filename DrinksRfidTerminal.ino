@@ -67,12 +67,12 @@ void loop()
 
     showSelection();
 
-    //if (buttons.leftPressed())
+    // Button left
     if (encoder.leftPressed())
     {
         moveSelectedProduct(-1);
     }
-    //else if (buttons.rightPressed())
+    //Button right
     else if (encoder.rightPressed())
     {
         moveSelectedProduct(+1);

@@ -77,6 +77,4 @@ void Encoder::begin()
   
   attachInterrupt(digitalPinToInterrupt(encoder0PinA), doEncoder, CHANGE);  // UNO encoder pin on interrupt 0 - pin 2
   attachInterrupt(digitalPinToInterrupt(encoder0Press), doBtn, FALLING );   // UNO encoder pin on interrupt 0 - pin 2
-
-  Serial.println("Start encoder");
 }

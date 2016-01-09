@@ -9,8 +9,6 @@
 #ifndef _BUTTONS_H
 #define _BUTTONS_H
 
-extern bool isLeftButtonPressed, isRightButtonPressed;
-
 class Buttons
 {
 public:

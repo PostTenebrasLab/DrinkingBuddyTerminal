@@ -36,10 +36,12 @@ void Buttons::onRightPressed()
 
 void Buttons::begin()
 {
-    pinMode(PIN_BTN_LEFT, INPUT);
-    digitalWrite(PIN_BTN_LEFT, HIGH);
-    pinMode(PIN_BTN_RIGHT, INPUT);
-    digitalWrite(PIN_BTN_RIGHT, HIGH);
+    // /!\Code need to be changed to use rotary encoder 
+ 
+    //pinMode(PIN_BTN_LEFT, INPUT);
+    //digitalWrite(PIN_BTN_LEFT, HIGH);
+    //pinMode(PIN_BTN_RIGHT, INPUT);
+    //digitalWrite(PIN_BTN_RIGHT, HIGH);
     attachInterrupt(0, onRightPressed, FALLING);
     attachInterrupt(1, onLeftPressed, FALLING);
 }

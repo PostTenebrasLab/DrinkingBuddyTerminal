@@ -5,7 +5,6 @@
 #ifndef _ENCODER_H
 #define _ENCODER_H
 
-extern bool isLeftButtonPressed, isRightButtonPressed;
 class Encoder
 {
 public:

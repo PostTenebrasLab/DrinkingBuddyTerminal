@@ -148,6 +148,7 @@ bool buy(char* badge, int product)
   if (!buyTransaction.perform(badge, product, clock.getUnixTime()))
   {
     display.setError();
+    encoder.ledChange(true,false,false);
     return false;
   }
 
@@ -167,6 +168,7 @@ bool sync()
   if (!syncTransaction.perform())
   {
     display.setError();
+    encoder.ledChange(true,false,false);
     return false;
   }
 

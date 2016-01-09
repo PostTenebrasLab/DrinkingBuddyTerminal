@@ -29,10 +29,10 @@ void HttpClient::begin()
 
     // start the Ethernet connection:
     Ethernet.begin(mac, ip);
-    //while (0 == Ethernet.begin(mac)) 
-    //{
-    //    Serial.println("Failed. Retry...");
-    //}
+//    while (0 == Ethernet.begin(mac)) 
+//    {
+//        Serial.println("Failed. Retry...");
+//    }
 
     Serial.print("Address=");
     Serial.println(Ethernet.localIP());
@@ -70,7 +70,7 @@ void HttpClient::readln(char* buffer, int size)
         if (client.available()>0)
         {
           char c = client.read();
-          //Serial.print(c);  
+          Serial.print(c);  
           
           if (c == '\n') break;
               

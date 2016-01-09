@@ -1,9 +1,9 @@
 /*
-* "Drinks" RFID Terminal
-* Buy sodas with your company badge!
-*
-* Benoit Blanchon 2014 - MIT License
-* https://github.com/bblanchon/DrinksRfidTerminal
+  "Drinks" RFID Terminal
+  Buy sodas with your company badge!
+
+  Benoit Blanchon 2014 - MIT License
+  https://github.com/bblanchon/DrinksRfidTerminal
 */
 
 #include <Ethernet.h>
@@ -41,139 +41,139 @@ unsigned long lastEventTime = 0;
 
 void setup()
 {
-    Serial.begin(9600);
+  Serial.begin(9600);
 
-    display.begin();
-    display.setBacklight(255);
-    display.setBusy();
+  display.begin();
+  display.setBacklight(255);
+  display.setBusy();
 
-    sound.begin();
-    http.begin();
-    encoder.begin();
-    rfid.begin();
+  sound.begin();
+  http.begin();
+  encoder.begin();
+  rfid.begin();
 
-    //while (!sync())
-    //{
-    //    delay(5000);
-    //}
+  while (!sync())
+  {
+      delay(5000);
+  }
 }
 
 void loop()
 {
-  
-    unsigned long now = millis();
 
-    showSelection();
+  unsigned long now = millis();
 
-    // Button left
-    if (encoder.leftPressed())
+  showSelection();
+
+  // Button left
+  if (encoder.leftPressed())
+  {
+    moveSelectedProduct(-1);
+  }
+  //Button right
+  else if (encoder.rightPressed())
+  {
+    moveSelectedProduct(+1);
+  }
+
+  if (now > lastEventTime + IDLE_PERIOD)
+  {
+    if (selectedProduct != 0)
     {
-        moveSelectedProduct(-1);
+      selectedProduct = 0;
+      showSelection();
     }
-    //Button right
-    else if (encoder.rightPressed())
+
+    if (now > lastSyncTime + SYNC_PERIOD)
     {
-        moveSelectedProduct(+1);
+      if (!sync())
+      {
+        delay(5000);
+      }
+      return;
     }
+  }
+  else
+  {
+    unsigned long remainingTime = lastEventTime + IDLE_PERIOD - now;
 
-    if (now > lastEventTime + IDLE_PERIOD)
+    if (remainingTime < 1024)
     {
-        if (selectedProduct != 0)
-        {
-            selectedProduct = 0;
-            showSelection();
-        }
-
-        if (now > lastSyncTime + SYNC_PERIOD)
-        {
-            if (!sync())
-            {
-                delay(5000);
-            }
-            return;
-        }
+      display.setBacklight(remainingTime / 4);
     }
     else
     {
-        unsigned long remainingTime = lastEventTime + IDLE_PERIOD - now;
-
-        if (remainingTime < 1024)
-        {
-            display.setBacklight(remainingTime / 4);
-        }
-        else
-        {
-            display.setBacklight(255);
-        }
+      display.setBacklight(255);
     }
+  }
 
-    char* badge = rfid.tryRead();
+  char* badge = rfid.tryRead();
 
-    if (badge)
-    {
-        Serial.print("badge found ");
-        Serial.println(badge);
-        buy(badge, selectedProduct);
+  if (badge)
+  {
+    Serial.print("badge found ");
+    Serial.println(badge);
+    buy(badge, selectedProduct);
 
-        delay(2000);
+    delay(2000);
 
-        // ignore all waiting badge to avoid unintended double buy
-        while (rfid.tryRead());
+    // ignore all waiting badge to avoid unintended double buy
+    while (rfid.tryRead());
 
-        lastEventTime = millis();
-    }    
-    
+    lastEventTime = millis();
+  }
+
 }
 
 void moveSelectedProduct(int increment)
 {
-    lastEventTime = millis();
-    selectedProduct = (selectedProduct + increment + catalog.getProductCount()) % catalog.getProductCount();
-    showSelection();
+  lastEventTime = millis();
+  selectedProduct = (selectedProduct + increment + catalog.getProductCount()) % catalog.getProductCount();
+  showSelection();
 }
 
 void showSelection()
 {
-    display.setText(0, catalog.getHeader());
-    display.setSelection(1, catalog.getProduct(selectedProduct));
+  display.setText(0, catalog.getHeader());
+  display.setSelection(1, catalog.getProduct(selectedProduct));
 }
 
 bool buy(char* badge, int product)
 {
-    display.setBacklight(255);
-    display.setBusy();
+  display.setBacklight(255);
+  display.setBusy();
 
-    HttpBuyTransaction buyTransaction(http);
+  HttpBuyTransaction buyTransaction(http);
 
-    if (!buyTransaction.perform(badge, product, clock.getUnixTime()))
-    {
-        display.setError();
-        return false;
-    }
+  if (!buyTransaction.perform(badge, product, clock.getUnixTime()))
+  {
+    display.setError();
+    return false;
+  }
 
-    display.setText(0, buyTransaction.getMessage(0));
-    display.setText(1, buyTransaction.getMessage(1));
-    sound.play(buyTransaction.getMelody());
+  display.setText(0, buyTransaction.getMessage(0));
+  display.setText(1, buyTransaction.getMessage(1));
+  sound.play(buyTransaction.getMelody());
 
-    return true;
+  return true;
 }
 
 bool sync()
 {
-    display.setBusy();
+  display.setBusy();
 
-    HttpSyncTransaction syncTransaction(http);
+  HttpSyncTransaction syncTransaction(http);
 
-    if (!syncTransaction.perform())
-    {
-        display.setError();
-        return false;
-    }
-    
-    syncTransaction.getCatalog(catalog);
-    clock.setUnixTime(syncTransaction.getTime());
+  if (!syncTransaction.perform())
+  {
+    display.setError();
+    return false;
+  }
 
-    lastSyncTime = millis();
+  syncTransaction.getCatalog(catalog);
+  clock.setUnixTime(syncTransaction.getTime());
 
-    return true;
+  lastSyncTime = millis();
+
+  return true;
 }

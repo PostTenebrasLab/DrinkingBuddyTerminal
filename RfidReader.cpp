@@ -38,27 +38,35 @@ char* RfidReader::tryRead()
 {
     int i;
 
-    if (rfid.available() < 14) return NULL;
-
-    for (i = 0; i < 14; i++)
-        buffer[i] = rfid.read();
-
-    if (buffer[0] != 2 || buffer[13] != 3)
-    {
-        rfid.flush();
-        Serial.println("RFID unsynced !");
+        // Look for new cards
+    if ( ! mfrc522.PICC_IsNewCardPresent())
         return NULL;
-    }
 
-    byte readCheckSum = parseHexByte(buffer + 11);
-    byte computedCheckSum = computeCheckSum(buffer + 1);
-
-    if (readCheckSum != computedCheckSum)
-    {
-        Serial.println("RFID checksum !");
+    // Select one of the cards
+    if ( ! mfrc522.PICC_ReadCardSerial())
         return NULL;
-    }
 
-    buffer[11] = 0;
-    return buffer + 1;
+
+    // convert UID to string
+    for(int i=0; i<mfrc522.uid.size; i++) {
+      sprintf(&buffer[i*2], "%02X", (int)mfrc522.uid.uidByte[i]);
+    }
+ 
+//    if (buffer[0] != 2 || buffer[13] != 3)
+//    {
+//        rfid.flush();
+//        Serial.println("RFID unsynced !");
+//        return NULL;
+//    }
+
+//    byte readCheckSum = parseHexByte(buffer + 11);
+//    byte computedCheckSum = computeCheckSum(buffer + 1);
+//
+//    if (readCheckSum != computedCheckSum)
+//    {
+//        Serial.println("RFID checksum !");
+//        return NULL;
+//    }
+
+    return buffer;
 }

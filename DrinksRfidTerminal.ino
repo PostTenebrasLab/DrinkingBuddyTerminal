@@ -26,7 +26,6 @@
 #define SYNC_PERIOD    600000UL // 10 minutes
 #define IDLE_PERIOD    15000UL  // 15 seconds
 
-//static Buttons buttons; //Obsolète...à remplacer par encoder
 static Encoder encoder;
 static Catalog catalog;
 static Clock clock;

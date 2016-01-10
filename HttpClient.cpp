@@ -78,7 +78,7 @@ void HttpClient::readln(char* buffer, int size)
         }
         else if (!connected)
         {
-            Serial.println("interrupted");
+            //Serial.println("interrupted");
             break;    
         }
         

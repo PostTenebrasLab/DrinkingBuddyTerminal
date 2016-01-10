@@ -17,7 +17,7 @@ bool HttpSyncTransaction::send()
 {
     buffer[0] = 0;
 
-    return http.query("GET " API_PATH "/sync", buffer, sizeof(buffer));
+    return http.query("GET " API_PATH "/sync", buffer, buffer_size-1);
 }
 
 bool HttpSyncTransaction::parse()
@@ -60,7 +60,17 @@ bool HttpSyncTransaction::validate()
 
     hashBuilder.print(time);
 
-    return strcasecmp(hash, hashBuilder.getHash()) == 0;
+    const char* hash2 = hashBuilder.getHash();
+
+    Serial.println("");
+    Serial.print("'");
+    Serial.print(hash);
+    Serial.print("' == '");
+    Serial.print(hash2);
+    Serial.print("' -> ");
+    Serial.println(!strcmp(hash, hash2));
+
+    return !strcmp(hash, hash2);
 }
 
 void HttpSyncTransaction::getCatalog(Catalog& catalog)

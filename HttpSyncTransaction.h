@@ -37,7 +37,8 @@ private:
     bool validate();
 
     HttpClient& http;
-    char buffer[200];    
+    static const int buffer_size = 200;
+    char buffer[buffer_size];    
     const char* time;
     const char* header;
     const char* products[Catalog::MAX_PRODUCT_COUNT + 1];

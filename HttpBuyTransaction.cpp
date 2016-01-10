@@ -37,6 +37,26 @@ bool HttpBuyTransaction::send(char* badge, int product, unsigned long time)
     return http.query("POST " API_PATH "/buy", buffer, sizeof(buffer));
 }
 
+bool HttpBuyTransaction::sendForBalance(char* badge, unsigned long time)
+{
+    char timeString[11];
+    
+    snprintf(timeString, sizeof(timeString), "%lu", time);
+
+    HashBuilder hashBuilder;
+    hashBuilder.print(badge);
+    hashBuilder.print(timeString);
+    
+    StaticJsonBuffer<JSON_OBJECT_SIZE(4)> jsonBuffer;
+    JsonObject& json = jsonBuffer.createObject();
+    json["Badge"] = badge;
+    json["Hash"] = hashBuilder.getHash();
+    json["Time"] = timeString;
+    json.printTo(buffer, sizeof(buffer));
+
+    return http.query("POST " API_PATH "/balance", buffer, sizeof(buffer));
+}
+
 bool HttpBuyTransaction::parse()
 {
     StaticJsonBuffer<JSON_OBJECT_SIZE(4)+JSON_ARRAY_SIZE(2)> jsonBuffer;

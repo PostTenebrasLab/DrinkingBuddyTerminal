@@ -25,12 +25,18 @@ public:
         return send(badge, product, time) && parse() && validate();
     }
 
+    bool getBalance(char* badge, unsigned long time)
+    {
+        return sendForBalance(badge, time) && parse() && validate();
+    }
+
     const char* getMelody() { return melody; }
     const char* getMessage(int i) { return messages[i]; }
 
 private:
 
     bool send(char*, int, unsigned long);
+    bool sendForBalance(char*, unsigned long);
     bool parse();
     bool validate();
 

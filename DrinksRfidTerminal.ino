@@ -117,7 +117,9 @@ void loop()
   {
     Serial.print("badge found ");
     Serial.println(badge);
-    buy(badge, selectedProduct);
+    getBalance(badge);
+    
+    //buy(badge, selectedProduct); // TODO ---> We want to buy when we click the button, not when we put the badge. 
 
     delay(2000);
 
@@ -160,6 +162,28 @@ bool buy(char* badge, int product)
   display.setText(0, buyTransaction.getMessage(0));
   display.setText(1, buyTransaction.getMessage(1));
   encoder.ledChange(false,false,false);
+  sound.play(buyTransaction.getMelody());
+
+  return true;
+}
+
+bool getBalance(char* badge)
+{
+  display.setBacklight(255);
+  display.setBusy();
+
+  HttpBuyTransaction buyTransaction(http);
+
+  if (!buyTransaction.getBalance(badge, clock.getUnixTime()))
+  {
+    display.setError();
+    encoder.ledChange(true,false,false);
+    return false;
+  }
+
+  display.setText(0, buyTransaction.getMessage(0));
+  display.setText(1, buyTransaction.getMessage(1));
+  encoder.ledChange(false,true,false);
   sound.play(buyTransaction.getMelody());
 
   return true;

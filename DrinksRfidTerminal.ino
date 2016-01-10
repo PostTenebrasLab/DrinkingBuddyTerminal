@@ -26,7 +26,6 @@
 #define SYNC_PERIOD    600000UL // 10 minutes
 #define IDLE_PERIOD    15000UL  // 15 seconds
 
-//static Buttons buttons; //Obsolète...à remplacer par encoder
 static Encoder encoder;
 static Catalog catalog;
 static Clock clock;
@@ -60,7 +59,6 @@ void setup()
 
 void loop()
 {
-
   unsigned long now = millis();
 
   showSelection();
@@ -69,11 +67,17 @@ void loop()
   if (encoder.leftPressed())
   {
     moveSelectedProduct(-1);
+    encoder.ledChange(true,true,true);
+    delay(200);
+    encoder.ledChange(false,false,false);
   }
   //Button right
   else if (encoder.rightPressed())
   {
     moveSelectedProduct(+1);
+    encoder.ledChange(true,true,true);
+    delay(200);
+    encoder.ledChange(false,false,false);
   }
 
   if (now > lastEventTime + IDLE_PERIOD)
@@ -135,6 +139,7 @@ void moveSelectedProduct(int increment)
 void showSelection()
 {
   display.setText(0, catalog.getHeader());
+  encoder.ledChange(false,false,false);
   display.setSelection(1, catalog.getProduct(selectedProduct));
 }
 
@@ -154,6 +159,7 @@ bool buy(char* badge, int product)
 
   display.setText(0, buyTransaction.getMessage(0));
   display.setText(1, buyTransaction.getMessage(1));
+  encoder.ledChange(false,false,false);
   sound.play(buyTransaction.getMelody());
 
   return true;

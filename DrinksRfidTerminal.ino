@@ -126,6 +126,9 @@ void loop()
     // ignore all waiting badge to avoid unintended double buy
     while (rfid.tryRead());
 
+    if (encoder.btnPressed())
+      buy(badge, selectedProduct);
+
     lastEventTime = millis();
   }
 

@@ -59,7 +59,6 @@ void setup()
 
 void loop()
 {
-
   unsigned long now = millis();
 
   showSelection();

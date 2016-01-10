@@ -29,10 +29,6 @@ void HttpClient::begin()
 
     // start the Ethernet connection:
     Ethernet.begin(mac, ip);
-//    while (0 == Ethernet.begin(mac)) 
-//    {
-//        Serial.println("Failed. Retry...");
-//    }
 
     Serial.print("Address=");
     Serial.println(Ethernet.localIP());
@@ -90,10 +86,7 @@ void HttpClient::readln(char* buffer, int size)
 
 bool HttpClient::query(const char* request, char* content, int maxContentSize)
 {
-    /*
-     * 1. SEND REQUEST
-     */
-
+     // 1. SEND REQUEST
     Serial.println(request);    
 
     if (!client.connect(serverIp, SERVER_PORT))
@@ -123,9 +116,7 @@ bool HttpClient::query(const char* request, char* content, int maxContentSize)
         client.println();
     }
 
-    /*
-     * 2. READ RESPONSE
-     */        
+    // 2. READ RESPONSE
     
     // skip HTTP headers
     while (readln(content, maxContentSize), NOT_EMPTY(content));
@@ -133,8 +124,6 @@ bool HttpClient::query(const char* request, char* content, int maxContentSize)
     // read content
     readln(content, maxContentSize);
         
-    //Serial.println(content);
-
     client.stop();
 
     return content[0] != 0;

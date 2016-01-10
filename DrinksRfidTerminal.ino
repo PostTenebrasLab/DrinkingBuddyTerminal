@@ -37,6 +37,9 @@ static Sound sound;
 int selectedProduct = 0;
 unsigned long lastSyncTime = 0;
 unsigned long lastEventTime = 0;
+unsigned long lastBadgeTime = 0;
+
+char* lastBadge = "";
 
 void setup()
 {
@@ -79,6 +82,10 @@ void loop()
     delay(200);
     encoder.ledChange(false,false,false);
   }
+  else if (encoder.btnPressed() && (lastBadgeTime + IDLE_PERIOD) > now)
+      buy(lastBadge, selectedProduct);
+  else
+      lastBadge = "";
 
   if (now > lastEventTime + IDLE_PERIOD)
   {
@@ -115,6 +122,7 @@ void loop()
 
   if (badge)
   {
+    lastBadge = badge;
     Serial.print("badge found ");
     Serial.println(badge);
     getBalance(badge);
@@ -126,10 +134,10 @@ void loop()
     // ignore all waiting badge to avoid unintended double buy
     while (rfid.tryRead());
 
-    if (encoder.btnPressed())
-      buy(badge, selectedProduct);
+    
 
     lastEventTime = millis();
+    lastBadgeTime = millis();
   }
 
 }

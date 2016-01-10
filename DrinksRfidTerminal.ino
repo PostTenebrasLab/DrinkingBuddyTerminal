@@ -70,23 +70,25 @@ void loop()
   if (encoder.leftPressed())
   {
     moveSelectedProduct(-1);
-    encoder.ledChange(true,true,true);
-    delay(200);
-    encoder.ledChange(false,false,false);
   }
   //Button right
   else if (encoder.rightPressed())
   {
     moveSelectedProduct(+1);
-    encoder.ledChange(true,true,true);
-    delay(200);
-    encoder.ledChange(false,false,false);
   }
-  else if (encoder.btnPressed() && (lastBadgeTime + IDLE_PERIOD) > now)
+  else if (encoder.btnPressed() && (lastBadgeTime + IDLE_PERIOD) > now && lastBadge != "")
+  {    
+      encoder.ledChange(false,false,true);
+      Serial.print("Last badge before buy send: ");
+      Serial.println(lastBadge);
       buy(lastBadge, selectedProduct);
-  else
       lastBadge = "";
-
+  }
+  else if ((lastBadgeTime + IDLE_PERIOD) < now)
+  {
+      lastBadge = "";
+      encoder.ledChange(false,false,false); //turn off green led
+  }
   if (now > lastEventTime + IDLE_PERIOD)
   {
     if (selectedProduct != 0)
@@ -125,6 +127,8 @@ void loop()
     lastBadge = badge;
     Serial.print("badge found ");
     Serial.println(badge);
+    Serial.print("Last badge changed to: ");
+    Serial.println(lastBadge);
     getBalance(badge);
     
     //buy(badge, selectedProduct); // TODO ---> We want to buy when we click the button, not when we put the badge. 
@@ -151,8 +155,7 @@ void moveSelectedProduct(int increment)
 
 void showSelection()
 {
-  display.setText(0, catalog.getHeader());
-  encoder.ledChange(false,false,false);
+  display.setText(0, catalog.getHeader());  
   display.setSelection(1, catalog.getProduct(selectedProduct));
 }
 

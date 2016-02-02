@@ -10,13 +10,13 @@
 #define _PINS_H
 
 // RGB Led
-#define ledRED   6
-#define ledGREEN 7
-#define ledBLUE  8
+#define ledRED   17
+#define ledGREEN 16
+#define ledBLUE  15
 
 // Rotary encoder
-#define encoder0PinA  2   //pinA
-#define encoder0PinB  4   //pinB
+#define encoder0PinA  21   //pinA
+#define encoder0PinB  19   //pinB
 #define encoder0Press 3   //Button
 
 #define PIN_LCD_LIGHT  23
@@ -34,5 +34,7 @@
 #define PIN_RFID_CLK   52
 
 #define PIN_BUZZER     22
+
+#define PIN_RELAY       9
 
 #endif

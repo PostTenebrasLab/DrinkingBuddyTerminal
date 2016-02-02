@@ -96,6 +96,9 @@ private:
     static unsigned int encoder0Pos;
     static unsigned int encoder0PosOld;
     static unsigned long lastCall;
+
+    static boolean fired;
+    static boolean up;
 };
 
 #endif

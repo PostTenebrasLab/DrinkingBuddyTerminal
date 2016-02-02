@@ -19,6 +19,8 @@ unsigned int Encoder::encoder0Pos = 0;
 unsigned int Encoder::encoder0PosOld = 0;
 
 unsigned long Encoder::lastCall = 0;
+boolean Encoder::fired=false; 
+boolean Encoder::up=false; 
 
 bool Encoder::checkBounce()
 {
@@ -44,17 +46,38 @@ void Encoder::doBtn()
 
 void Encoder::doEncoder()
 {
-  if (digitalRead(encoder0PinA) == digitalRead(encoder0PinB)) {
+
+  if (digitalRead (encoder0PinA)) 
+    up = digitalRead (encoder0PinB); 
+  else 
+    up = !digitalRead (encoder0PinB); 
+  fired = true;  
+  if (up)
+  {
+  encoder0Pos++;
+  pressedButton = LEFT;
+  }
+  else 
+  {
+    encoder0Pos--; 
+    pressedButton = RIGHT;
+  }    
+
+  Serial.println(pressedButton);
+  /*
+      if (digitalRead(encoder0PinA) == digitalRead(encoder0PinB)) {
         encoder0Pos++;
       } else {
         encoder0Pos--;
       }
+      
       if(encoder0PosOld>encoder0Pos && checkBounce())
         pressedButton = RIGHT;
       else if(encoder0PosOld<encoder0Pos && checkBounce())
         pressedButton = LEFT;
+
       
-      encoder0PosOld = encoder0Pos;
+      encoder0PosOld = encoder0Pos;*/
 }
 
 void Encoder::begin()

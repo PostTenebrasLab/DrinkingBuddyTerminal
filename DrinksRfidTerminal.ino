@@ -22,6 +22,8 @@
 #include "HttpSyncTransaction.h"
 #include "RfidReader.h"
 #include "Sound.h"
+#include "Configuration.h"
+
 
 #define SYNC_PERIOD    600000UL // 10 minutes
 #define IDLE_PERIOD    15000UL  // 15 seconds
@@ -41,6 +43,16 @@ unsigned long lastBadgeTime = 0;
 
 char* lastBadge = "";
 
+/*
+int ip0 = (int) String(IP_ADDRESS[0]);
+int ip1 = (int) String(IP_ADDRESS[1]);
+int ip2 = (int) String(IP_ADDRESS[2]);
+int ip3 = (int) String(IP_ADDRESS[3]);
+*/
+
+//byte myDefineIP[4] = IP_ADDRESS;
+byte myIP[4] = IP_ADDRESS;
+
 void setup()
 {
   Serial.begin(9600);
@@ -48,11 +60,18 @@ void setup()
   display.begin();
   display.setBacklight(255);
   display.setBusy();
+  encoder.begin();
+
+  getIP();  //Manually set IP, otherwise use default
 
   sound.begin();
-  http.begin();
-  encoder.begin();
+  
+  http.begin(myIP);
+  
   rfid.begin();
+
+  pinMode(PIN_RELAY, OUTPUT);
+  digitalWrite(PIN_RELAY, LOW);
 
   while (!sync())
   {
@@ -130,8 +149,6 @@ void loop()
     Serial.print("Last badge changed to: ");
     Serial.println(lastBadge);
     getBalance(badge);
-    
-    //buy(badge, selectedProduct); // TODO ---> We want to buy when we click the button, not when we put the badge. 
 
     delay(2000);
 
@@ -175,8 +192,20 @@ bool buy(char* badge, int product)
 
   display.setText(0, buyTransaction.getMessage(0));
   display.setText(1, buyTransaction.getMessage(1));
-  encoder.ledChange(false,false,false);
+  if(buyTransaction.getMessage(0) == "ERROR")
+    encoder.ledChange(true,false,false);
+  else
+  {
+    encoder.ledChange(false,true,false);  
+    digitalWrite(PIN_RELAY, LOW); //OPEN RELAY
+  }  
   sound.play(buyTransaction.getMelody());
+
+  if(digitalRead(PIN_RELAY)) //if relay is open, wait a little bit to allow the fridge to be opened
+    delay(IDLE_PERIOD/3);
+
+  digitalWrite(PIN_RELAY, LOW);
+  
 
   return true;
 }
@@ -222,4 +251,87 @@ bool sync()
   lastSyncTime = millis();
 
   return true;
+}
+
+
+void displayIP()
+{
+  
+  char ip[16];
+  /*
+  String myText = "";
+  myText.concat(myIP[0]);
+  myText.concat(".");
+  myText.concat(myIP[1]);
+  myText.concat(".");
+  myText.concat(myIP[2]);
+  myText.concat(".");
+  myText.concat(myIP[3]);
+  myText.toCharArray(ip, sizeof(ip));*/
+  sprintf(ip, "%03d.%03d.%03d.%03d",(int) myIP[0],(int) myIP[1],(int) myIP[2],(int) myIP[3]);
+  display.setText(1,ip);
+}
+
+void getIP()
+{ 
+  //memcpy(myIP, myDefineIP, sizeof(myDefineIP)); //copy array from predefined
+  display.setBacklight(255);
+  display.setText(0,"Set IP?");
+  displayIP();
+  
+  unsigned long myStart = millis();
+  bool myState = true;
+  while (IDLE_PERIOD/5 > millis() - myStart)
+  {
+    encoder.ledChange(false,false,myState); //flash LED
+    if(encoder.btnPressed())
+    {
+      encoder.ledChange(true,true,true); //flash LED
+      readOctet(0);
+      readOctet(1);
+      readOctet(2);
+      readOctet(3);
+      
+      break;
+    }   
+    myState = ! myState;
+    delay(500);  //half a sec wait    
+  } 
+}
+
+int checkOctet(int myOct)
+{
+  if(myOct > 254)
+    return 0;
+  else if(myOct <0)
+    return 254;
+  else
+    return myOct;   
+}
+
+
+void readOctet(int myOctet)
+{
+  while(!encoder.btnPressed())
+  { 
+    displayIP();
+    if (encoder.leftPressed())
+    {
+      //myIP[0]--;
+      myIP[myOctet] = checkOctet(myIP[myOctet] - 1);
+      displayIP();
+    }
+    //Button right
+    else if (encoder.rightPressed())
+    {
+      //myIP[0]++;
+      myIP[myOctet] = checkOctet(myIP[myOctet] + 1);
+      displayIP();
+    }
+    else if (encoder.btnPressed())
+    {
+      break;
+    }     
+    delay(200);
+  }
 }

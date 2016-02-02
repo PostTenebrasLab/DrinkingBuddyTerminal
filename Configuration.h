@@ -13,9 +13,9 @@
 
 #define MAC_ADDRESS {0x01,0x23,0x45,0x67,0x89,0xAB}
 
-#define IP_ADDRESS { 172, 16, 222, 9 };
+#define IP_ADDRESS { 192, 168, 80, 240 };
 
-#define SERVER_NAME "172.16.222.73"
+#define SERVER_NAME "192.168.80.193"
 
 #define SERVER_PORT 5000
 

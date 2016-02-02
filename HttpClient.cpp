@@ -19,16 +19,25 @@
 
 #define NOT_EMPTY(s) (s[0]!=0 && s[0]!='\r' && s[0]!='\n')
 
-void HttpClient::begin()
+void HttpClient::begin(const byte* ip)
 {
+
+    //pinMode(4, OUTPUT);
+    //pinMode(10, OUTPUT);
+    //digitalWrite(4, HIGH);
+    //digitalWrite(10, LOW);
     delay(100);
 
     byte mac[6] = {0};
-    byte ip[4] = IP_ADDRESS;
+    byte myip[4] = IP_ADDRESS;
     Serial.println("DHCP...");
 
     // start the Ethernet connection:
-    Ethernet.begin(mac, ip);
+    if(ip)
+      //Ethernet.begin(mac, ip);
+      Ethernet.begin(mac, myip);
+    else
+      Ethernet.begin(mac);
 
     Serial.print("Address=");
     Serial.println(Ethernet.localIP());

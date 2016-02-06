@@ -62,10 +62,10 @@ bool HttpBuyTransaction::parse()
     StaticJsonBuffer<JSON_OBJECT_SIZE(4)+JSON_ARRAY_SIZE(2)> jsonBuffer;
 
     JsonObject& root = jsonBuffer.parseObject(buffer);
-    if (!root.success()) return false;
+    if (!root.success()) {Serial.println("JSON error"); error = "JSON error"; return false;}
 
     melody = root["Melody"];
-    if (melody == NULL) return false;
+    if (melody == NULL) {Serial.println("No melody sent"); error = "No melody sent"; return false;}
 
     JsonArray& messageArray = root["Message"];
     if (!messageArray.success()) return false;
@@ -74,10 +74,10 @@ bool HttpBuyTransaction::parse()
     messages[1] = messageArray[1];
 
     time = root["Time"];
-    if (time == NULL) return false;
+    if (time == NULL) {Serial.println("No time sent"); error = "No time sent"; return false;}
 
     hash = root["Hash"];
-    if (hash == NULL) return false;
+    if (hash == NULL) {Serial.println("No hash sent"); error = "No hash sent"; return false;}
 
     return true;
 }
@@ -90,5 +90,13 @@ bool HttpBuyTransaction::validate()
     hashBuilder.print(messages[1]);
     hashBuilder.print(time);
 
-    return strcasecmp(hash, hashBuilder.getHash()) == 0;
+    if(strcasecmp(hash, hashBuilder.getHash()) == 0)
+      return true;
+    else
+    {
+      Serial.println("Hash incorrect");
+      Serial.print("Time: "); Serial.println(time);
+      error = "Hash incorrect";
+      return false;
+    }
 }

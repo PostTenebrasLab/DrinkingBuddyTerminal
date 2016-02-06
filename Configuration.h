@@ -19,6 +19,8 @@
 
 #define SERVER_PORT 5000
 
+#define MAX_PRODUCTS 20
+
 #define API_PATH    "/DrinkingBuddy"
 
 #endif

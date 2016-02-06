@@ -39,6 +39,7 @@ bool HttpSyncTransaction::parse()
         products[i] = productsArray[i];
     }
     products[count] = NULL;
+    Serial.print("Products count: "); Serial.println(productsArray.size());
 
     time = root["Time"];
     if (time == NULL) return false;
@@ -78,7 +79,7 @@ void HttpSyncTransaction::getCatalog(Catalog& catalog)
     catalog.setHeader(header);
 
     int i;
-    for (i = 0; i < 4; i++)
+    for (i = 0; i < MAX_PRODUCTS; i++)
     {
         if (products[i] == NULL) break;
         catalog.setProduct(i, products[i]);

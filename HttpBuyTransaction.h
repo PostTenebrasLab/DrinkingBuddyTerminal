@@ -31,6 +31,7 @@ public:
     }
 
     const char* getMelody() { return melody; }
+    const char* getError() { return error; }
     const char* getMessage(int i) { return messages[i]; }
 
 private:
@@ -46,6 +47,7 @@ private:
     const char* messages[2];
     const char* melody;
     const char* time;
+    const char* error;
 };
 
 #endif

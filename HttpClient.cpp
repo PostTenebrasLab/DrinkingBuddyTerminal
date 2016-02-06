@@ -27,17 +27,18 @@ void HttpClient::begin(const byte* ip)
     //digitalWrite(4, HIGH);
     //digitalWrite(10, LOW);
     delay(100);
+    Serial.begin(9600);
 
     byte mac[6] = {0};
     byte myip[4] = IP_ADDRESS;
-    Serial.println("DHCP...");
+    
 
     // start the Ethernet connection:
     if(ip)
       //Ethernet.begin(mac, ip);
       Ethernet.begin(mac, myip);
     else
-      Ethernet.begin(mac);
+      {Ethernet.begin(mac);Serial.println("DHCP...");}
 
     Serial.print("Address=");
     Serial.println(Ethernet.localIP());

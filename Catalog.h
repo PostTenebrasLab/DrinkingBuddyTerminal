@@ -6,6 +6,8 @@
 * https://github.com/bblanchon/DrinksRfidTerminal
 */
 
+#include "Configuration.h"
+
 #ifndef _CATALOG_H
 #define _CATALOG_H
 
@@ -48,7 +50,7 @@ public:
         strncpy(header, s, CATALOG_HEADER_SIZE);
     }
 
-    static const int MAX_PRODUCT_COUNT = 5;
+    static const int MAX_PRODUCT_COUNT = MAX_PRODUCTS;
     static const int PRODUCT_NAME_SIZE = 19;
     static const int CATALOG_HEADER_SIZE = 21;
 

@@ -27,6 +27,7 @@
 
 #define SYNC_PERIOD    600000UL // 10 minutes
 #define IDLE_PERIOD    15000UL  // 15 seconds
+#define TINY_WAIT 250UL //250 ms
 
 static Encoder encoder;
 static Catalog catalog;
@@ -43,14 +44,6 @@ unsigned long lastBadgeTime = 0;
 
 char* lastBadge = "";
 
-/*
-int ip0 = (int) String(IP_ADDRESS[0]);
-int ip1 = (int) String(IP_ADDRESS[1]);
-int ip2 = (int) String(IP_ADDRESS[2]);
-int ip3 = (int) String(IP_ADDRESS[3]);
-*/
-
-//byte myDefineIP[4] = IP_ADDRESS;
 byte myIP[4] = IP_ADDRESS;
 
 void setup()
@@ -65,7 +58,7 @@ void setup()
   getIP();  //Manually set IP, otherwise use default
 
   sound.begin();
-  
+    
   http.begin(myIP);
   
   rfid.begin();
@@ -75,7 +68,7 @@ void setup()
 
   while (!sync())
   {
-      delay(5000);
+      delay(10000);
   }
 }
 
@@ -89,11 +82,15 @@ void loop()
   if (encoder.leftPressed())
   {
     moveSelectedProduct(-1);
+    delay(TINY_WAIT);
+    encoder.leftPressed(); //clear last left press
   }
   //Button right
   else if (encoder.rightPressed())
   {
     moveSelectedProduct(+1);
+    delay(TINY_WAIT);
+     encoder.rightPressed(); //clear last right press
   }
   else if (encoder.btnPressed() && (lastBadgeTime + IDLE_PERIOD) > now && lastBadge != "")
   {    
@@ -108,6 +105,22 @@ void loop()
       lastBadge = "";
       encoder.ledChange(false,false,false); //turn off green led
   }
+  else if ((lastBadgeTime + IDLE_PERIOD - 3000) < now && lastBadge != "") //beep the last 3 seconds
+  {
+    sound.play("a1");
+    delay(500);
+  }
+  else if (encoder.btnPressed()) //case button pressed but no badge presented
+  {
+      Serial.println("Button pressed...cash trasnaction");
+      encoder.ledChange(true,false,false);
+      display.setText(0, "Cash payment");
+      display.setText(1, "Not implemented");
+      sound.play("a1c1");
+      delay(1500); 
+  }
+
+  
   if (now > lastEventTime + IDLE_PERIOD)
   {
     if (selectedProduct != 0)
@@ -166,6 +179,7 @@ void loop()
 void moveSelectedProduct(int increment)
 {
   lastEventTime = millis();
+  if(lastBadge != "") lastBadgeTime = millis(); //reset timeout if the user keeps moving
   selectedProduct = (selectedProduct + increment + catalog.getProductCount()) % catalog.getProductCount();
   showSelection();
 }
@@ -185,7 +199,7 @@ bool buy(char* badge, int product)
 
   if (!buyTransaction.perform(badge, product, clock.getUnixTime()))
   {
-    display.setError();
+    display.setError(buyTransaction.getError());
     encoder.ledChange(true,false,false);
     return false;
   }
@@ -201,10 +215,12 @@ bool buy(char* badge, int product)
   }  
   sound.play(buyTransaction.getMelody());
 
-  if(digitalRead(PIN_RELAY)) //if relay is open, wait a little bit to allow the fridge to be opened
+  if(digitalRead(PIN_RELAY) == LOW) //if relay is open(buy success), wait a little bit to allow the fridge to be opened
     delay(IDLE_PERIOD/3);
 
   digitalWrite(PIN_RELAY, LOW);
+
+  encoder.ledChange(false,false,false); //turn off green led
   
 
   return true;
@@ -258,16 +274,6 @@ void displayIP()
 {
   
   char ip[16];
-  /*
-  String myText = "";
-  myText.concat(myIP[0]);
-  myText.concat(".");
-  myText.concat(myIP[1]);
-  myText.concat(".");
-  myText.concat(myIP[2]);
-  myText.concat(".");
-  myText.concat(myIP[3]);
-  myText.toCharArray(ip, sizeof(ip));*/
   sprintf(ip, "%03d.%03d.%03d.%03d",(int) myIP[0],(int) myIP[1],(int) myIP[2],(int) myIP[3]);
   display.setText(1,ip);
 }

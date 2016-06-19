@@ -63,6 +63,7 @@ bool HttpSyncTransaction::validate()
 
     const char* hash2 = hashBuilder.getHash();
 
+
     Serial.println("");
     Serial.print("'");
     Serial.print(hash);

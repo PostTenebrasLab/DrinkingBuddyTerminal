@@ -6,8 +6,8 @@
   https://github.com/bblanchon/DrinksRfidTerminal
 */
 
-#include <Ethernet.h>
 #include <SPI.h>
+#include <Ethernet.h>
 #include <ArduinoJson.h>
 #include <LiquidCrystal.h>
 #include <SipHash_2_4.h>
@@ -25,7 +25,7 @@
 #include "Configuration.h"
 
 
-#define SYNC_PERIOD    600000UL // 10 minutes
+#define SYNC_PERIOD    300000UL // 5 minutes
 #define IDLE_PERIOD    15000UL  // 15 seconds
 #define TINY_WAIT 250UL //250 ms
 
@@ -46,26 +46,41 @@ char* lastBadge = "";
 
 byte myIP[4] = IP_ADDRESS;
 
+#define MAC_ADDRESS2 {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED}
+
+#define IP_ADDRESS2 { 10, 42, 65, 62 }
+
+#define SERVER_NAME2 "10.42.65.29"
+
+
 void setup()
 {
   Serial.begin(9600);
-
+  
+  Serial.println("Starting display...");
   display.begin();
   display.setBacklight(255);
   display.setBusy();
+
+  Serial.println("Starting encoder...");
   encoder.begin();
 
+  Serial.println("Getting IP...");
   getIP();  //Manually set IP, otherwise use default
 
+  Serial.println("Starting piezo buzzer...");
   sound.begin();
-    
+
+  Serial.println("Starting Ethernet...");
   http.begin(myIP);
-  
+
+  Serial.println("Starting RFID...");
   rfid.begin();
 
   pinMode(PIN_RELAY, OUTPUT);
   digitalWrite(PIN_RELAY, LOW);
 
+  Serial.println("Starting SYNC...");
   while (!sync())
   {
       delay(10000);
@@ -192,6 +207,7 @@ void showSelection()
 
 bool buy(char* badge, int product)
 {
+  
   display.setBacklight(255);
   display.setBusy();
 
@@ -201,12 +217,14 @@ bool buy(char* badge, int product)
   {
     display.setError(buyTransaction.getError());
     encoder.ledChange(true,false,false);
+    delay(IDLE_PERIOD/5);
     return false;
   }
-
+  
   display.setText(0, buyTransaction.getMessage(0));
   display.setText(1, buyTransaction.getMessage(1));
-  if(buyTransaction.getMessage(0) == "ERROR")
+  
+  if(strcmp(buyTransaction.getMessage(0),"ERROR") == 0)
     encoder.ledChange(true,false,false);
   else
   {
@@ -222,7 +240,7 @@ bool buy(char* badge, int product)
 
   encoder.ledChange(false,false,false); //turn off green led
   
-
+  Serial.println("BEFORE END");
   return true;
 }
 
@@ -235,17 +253,20 @@ bool getBalance(char* badge)
 
   if (!buyTransaction.getBalance(badge, clock.getUnixTime()))
   {
-    display.setError();
+    display.setError(buyTransaction.getError());
     encoder.ledChange(true,false,false);
+    delay(IDLE_PERIOD/5);
     return false;
   }
 
   display.setText(0, buyTransaction.getMessage(0));
   display.setText(1, buyTransaction.getMessage(1));
-  encoder.ledChange(false,true,false);
+  
   sound.play(buyTransaction.getMelody());
-
-  return true;
+  if(strcmp(buyTransaction.getMessage(0),"ERROR") == 0)
+    {lastBadge = ""; Serial.print("Unknown badge"); encoder.ledChange(true,false,false); delay(1000); encoder.ledChange(false,false,false); return false;}
+  else
+    {encoder.ledChange(false,true,false); return true;}
 }
 
 bool sync()
@@ -256,6 +277,7 @@ bool sync()
 
   if (!syncTransaction.perform())
   {
+    Serial.println("Error in sync transactions perform");
     display.setError();
     encoder.ledChange(true,false,false);
     return false;

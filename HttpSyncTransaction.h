@@ -24,6 +24,26 @@ public:
 
     bool perform()
     {
+//        //return send() && parse() && validate();
+//        bool res = send();
+//        if(res)
+//          Serial.println("Send OK");
+//        else
+//          Serial.println("Send NOK");
+//
+//        res = parse();
+//        if(res)
+//          Serial.println("parse OK");
+//        else
+//          Serial.println("parse NOK");
+//
+//        res = validate();
+//        if(res)
+//          Serial.println("validate OK");
+//        else
+//          Serial.println("validate NOK");
+          
+
         return send() && parse() && validate();
     }
 

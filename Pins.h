@@ -24,7 +24,7 @@
 #define PIN_LCD_EN     33
 #define PIN_LCD_D4     31
 #define PIN_LCD_D5     29
-#define PIN_LCD_D6     27
+#define PIN_LCD_D6     27 
 #define PIN_LCD_D7     25
 
 #define PIN_RFID_RESET 42
@@ -33,7 +33,7 @@
 #define PIN_RFID_MOSI  51
 #define PIN_RFID_CLK   52
 
-#define PIN_BUZZER     8
+#define PIN_BUZZER      10 // CORRECT VALUE = 8
 
 #define PIN_RELAY       9
 

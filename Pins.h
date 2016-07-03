@@ -33,7 +33,7 @@
 #define PIN_RFID_MOSI  51
 #define PIN_RFID_CLK   52
 
-#define PIN_BUZZER      10 // CORRECT VALUE = 8
+#define PIN_BUZZER      8 // CORRECT VALUE = 8
 
 #define PIN_RELAY       9
 

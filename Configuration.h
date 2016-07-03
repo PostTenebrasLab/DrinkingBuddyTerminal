@@ -13,11 +13,13 @@
 
 #define MAC_ADDRESS {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED}
 
-#define IP_ADDRESS { 10, 42, 65, 62 };
+#define IP_ADDRESS { 10, 42, 65, 64 };
 
-#define SERVER_NAME "10.42.65.29"
+#define SERVER_IP  "10.42.129.11"
 
-#define SERVER_PORT 5000
+#define SERVER_NAME "10.42.129.11" //"10.42.65.29" //"10.42.129.11"//
+
+#define SERVER_PORT 80 //5000
 
 #define MAX_PRODUCTS 20
 

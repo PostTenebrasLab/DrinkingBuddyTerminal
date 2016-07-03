@@ -97,6 +97,7 @@ bool HttpBuyTransaction::validate()
       Serial.print("Hash incorrect received: ");
       Serial.print(hash); Serial.print(" expecting "); Serial.println(hashBuilder.getHash());
       Serial.print("Time: "); Serial.println(time);
+      
       error = "Hash incorrect";
       return false;
     }

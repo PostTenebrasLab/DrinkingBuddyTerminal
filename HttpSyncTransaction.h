@@ -42,7 +42,7 @@ public:
 //          Serial.println("validate OK");
 //        else
 //          Serial.println("validate NOK");
-          
+//          
 
         return send() && parse() && validate();
     }

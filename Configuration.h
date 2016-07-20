@@ -9,20 +9,20 @@
 #ifndef _CONFIGURATION_H
 #define _CONFIGURATION_H
 
-//  PLEASE READ ! ! !
-// 
-//  You need to rename this file into "Configuration.h" in order to compile the project.
-//  Then you must change the values to match you actual configuration.
+#define PRIVATE_KEY {'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'}
 
-#define PRIVATE_KEY {0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f}
+#define MAC_ADDRESS {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED}
 
-#define MAC_ADDRESS {0x01,0x23,0x45,0x67,0x89,0xAB}
-#define IP_ADDRESS { 172, 16, 222, 9 };
+#define IP_ADDRESS { 10, 42, 65, 64 };
 
-#define SERVER_NAME "172.16.222.79"
+#define SERVER_IP  "10.42.129.11"
 
-#define SERVER_PORT 80
+#define SERVER_NAME "10.42.129.11" //"10.42.65.29" //"10.42.129.11"//
 
-#define API_PATH    "/drinks/api"
+#define SERVER_PORT 80 //5000
 
+#define MAX_PRODUCTS 20
+
+#define API_PATH    "" //"/DrinkingBuddy"
+ 
 #endif

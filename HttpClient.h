@@ -14,9 +14,13 @@
 class HttpClient
 {
 public:
-    void begin();
+    //void begin(const byte* ip = NULL);
+    void begin(const byte* ip);
 
     bool query(const char* path, char* content, int maxContentSize);
+
+    void setServer(char* ip);
+    char* serverIP;
 
 private:
 
@@ -24,6 +28,8 @@ private:
 
     IPAddress serverIp;
     EthernetClient client;
+    
+
 };
 
 #endif

@@ -24,6 +24,26 @@ public:
 
     bool perform()
     {
+        //return send() && parse() && validate();
+        bool res = send();
+        if(res)
+          Serial.println("Send OK");
+        else
+          Serial.println("Send NOK");
+
+        res = parse();
+        if(res)
+          Serial.println("parse OK");
+        else
+          Serial.println("parse NOK");
+
+        res = validate();
+        if(res)
+          Serial.println("validate OK");
+        else
+          Serial.println("validate NOK");
+          
+
         return send() && parse() && validate();
     }
 
@@ -37,10 +57,12 @@ private:
     bool validate();
 
     HttpClient& http;
-    char buffer[200];    
+    static const int buffer_size = 2000; //increased for bigger JSON
+    char buffer[buffer_size];    
     const char* time;
     const char* header;
     const char* products[Catalog::MAX_PRODUCT_COUNT + 1];
+    const char* dbID[Catalog::MAX_PRODUCT_COUNT + 1];
     const char* hash;
 };
 

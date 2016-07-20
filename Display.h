@@ -19,7 +19,9 @@ public:
     void setText(int, const char*);
     void setSelection(int, const char*);
     void setError();
+    void setError(const char*);
     void setBusy();
+    
     
     void setBacklight(byte intensity)
     {

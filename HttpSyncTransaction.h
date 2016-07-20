@@ -57,7 +57,7 @@ private:
     bool validate();
 
     HttpClient& http;
-    static const int buffer_size = 2000; //increased for bigger JSON
+    static const int buffer_size = 512; //increased for bigger JSON
     char buffer[buffer_size];    
     const char* time;
     const char* header;

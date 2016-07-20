@@ -32,7 +32,7 @@
 #define IDLE_PERIOD    15000UL  // 15 seconds
 #define TINY_WAIT 250UL //250 ms
 
-char auth[] = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
+char auth[] = "CODE";
 WidgetTerminal terminal(V0);
 
 static Encoder encoder;
@@ -86,7 +86,7 @@ void setup()
   rfid.begin();
 
   pinMode(PIN_RELAY, OUTPUT);
-  digitalWrite(PIN_RELAY, LOW);
+  digitalWrite(PIN_RELAY, HIGH);
 
   Serial.println("Starting SYNC...");
   lastSyncTime = millis();
@@ -100,7 +100,9 @@ void setup()
   
   display.setText(0, "Blynk connect...");
   display.setText(1, "Plz wait :)");
-  Blynk.begin(auth);
+  //Blynk.begin(auth);
+  Blynk.config(auth);
+  Blynk.connect(2000); //2000 * 3ms (blynk default) = 6 seconds
   terminal.flush();
 }
 
@@ -241,6 +243,13 @@ bool buy(char* badge, int product)
 
   HttpBuyTransaction buyTransaction(http);
 
+  Serial.print("Buying product with DBID: ");Serial.println(catalog.getProductDBID(product));
+  const char* myStr = catalog.getProductDBID(product);
+  product = atoi(myStr);
+  Serial.println(product);
+  Serial.println(atoi(myStr));
+  Serial.println(myStr);
+
   if (!buyTransaction.perform(badge, product, clock.getUnixTime()))
   {
     display.setError(buyTransaction.getError());
@@ -257,14 +266,14 @@ bool buy(char* badge, int product)
   else
   {
     encoder.ledChange(false, true, false);
-    digitalWrite(PIN_RELAY, HIGH); //OPEN RELAY
+    digitalWrite(PIN_RELAY, LOW); //OPEN RELAY
   }
   sound.play(buyTransaction.getMelody());
 
-  if (digitalRead(PIN_RELAY) == HIGH) //if relay is open(buy success), wait a little bit to allow the fridge to be opened
+  if (digitalRead(PIN_RELAY) == LOW) //if relay is open(buy success), wait a little bit to allow the fridge to be opened
     delay(IDLE_PERIOD / 3);
 
-  digitalWrite(PIN_RELAY, LOW);
+  digitalWrite(PIN_RELAY, HIGH);
 
   encoder.ledChange(false, false, false); //turn off green led
 

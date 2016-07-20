@@ -15,7 +15,7 @@
 
 bool HttpBuyTransaction::send(char* badge, int product, unsigned long time)
 {
-    char productString[2];
+    char productString[6];
     char timeString[11];
     
     snprintf(productString, sizeof(productString), "%d", product);

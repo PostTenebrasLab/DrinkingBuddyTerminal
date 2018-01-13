@@ -9,7 +9,7 @@
 #include <Arduino.h> 
 
 #include "encoder.h" 
-#include "pins.h"
+#include "Pins.h"
 
 byte Encoder::pressedButton = Encoder::NONE; 
 unsigned long Encoder::blindUntil = 0; 

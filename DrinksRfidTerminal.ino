@@ -16,10 +16,6 @@
 #include <BlynkSimpleEthernet.h>
 #include <EEPROM.h>
 
-<<<<<<< HEAD
-//#include "Buttons.h"  //Obsolète...à remplacer par encoder
-=======
->>>>>>> devel
 #include "encoder.h"
 #include "Catalog.h"
 #include "Clock.h"
@@ -36,13 +32,9 @@
 #define IDLE_PERIOD    15000UL  // 15 seconds
 #define TINY_WAIT 250UL //250 ms
 
-char auth[] = "CODE";
+char auth[] = "xxxxxxxxxxxxxxxx";
 WidgetTerminal terminal(V0);
 
-<<<<<<< HEAD
-//static Buttons buttons; //Obsolète...à remplacer par encoder
-=======
->>>>>>> devel
 static Encoder encoder;
 static Catalog catalog;
 static Clock clock;
@@ -82,16 +74,8 @@ void setup()
   Serial.println("Starting piezo buzzer...");
   sound.begin();
 
-<<<<<<< HEAD
-    sound.begin();
-    http.begin();
-    //buttons.begin(); //Obsolète...à remplacer par encoder
-    encoder.begin();
-    rfid.begin();
-=======
   Serial.println("Starting Ethernet...");
   http.begin(myIP);
->>>>>>> devel
 
   Serial.println("Setting server IP from EEPROM");
   char serverIP[16];
@@ -124,15 +108,6 @@ void setup()
 
 void loop()
 {
-<<<<<<< HEAD
-  
-    unsigned long now = millis();
-
-    showSelection();
-
-    //if (buttons.leftPressed())
-    if (encoder.leftPressed())
-=======
   Blynk.run();
 
   unsigned long now = millis();
@@ -186,18 +161,12 @@ void loop()
   if (now > lastEventTime + IDLE_PERIOD)
   {
     if (selectedProduct != 0)
->>>>>>> devel
     {
       selectedProduct = 0;
       showSelection();
     }
-<<<<<<< HEAD
-    //else if (buttons.rightPressed())
-    else if (encoder.rightPressed())
-=======
 
     if (now > lastSyncTime + SYNC_PERIOD)
->>>>>>> devel
     {
       if (!sync())
       {

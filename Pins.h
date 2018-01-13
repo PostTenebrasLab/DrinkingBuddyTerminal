@@ -9,7 +9,7 @@
 #ifndef _PINS_H
 #define _PINS_H
 
-<<<<<<< HEAD
+
 #define PIN_BTN_LEFT   2 //obsolète
 #define PIN_BTN_RIGHT  3 //obsolète
 
@@ -20,7 +20,7 @@
 #define encoder0PinA  2   //Rotary encoder
 #define encoder0PinB  4   //Rotary encoder
 #define encoder0Press 3   //For the button on the rotary  encoder
-=======
+
 // RGB Led
 #define ledRED   17
 #define ledGREEN 16
@@ -30,7 +30,7 @@
 #define encoder0PinA  21   //pinA
 #define encoder0PinB  19   //pinB
 #define encoder0Press 18   //Button
->>>>>>> devel
+
 
 #define PIN_LCD_LIGHT  23
 #define PIN_LCD_RS     35

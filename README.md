@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 Drinks RFID Terminal PTL version
 =======
 What is "DrinkingBuddy"?
@@ -26,7 +25,6 @@ Here is a link to the server API's implemented in Python (using Flask and SQLAlc
 https://github.com/PostTenebrasLab/DrinksBuddyServer
 
 Drinks RFID Terminal
->>>>>>> devel
 ====================
 The main differences between the original version and this is that we are using:
 * MRFC522 for the RFID reader
@@ -47,11 +45,8 @@ Requirements
 
 * [Arduino SipHash library](http://www.forward.com.au/pfod/SipHashLibrary/)
 * [Arduino JSON library](https://github.com/bblanchon/ArduinoJsonParser)
-<<<<<<< HEAD
 * [Blynk](http://www.blynk.cc/getting-started/)
 
 WiKi
 ------------
 [Drinking Buddy on PTL's website](https://www.posttenebraslab.ch/wiki/projects/ptl_payment_system)
-=======
->>>>>>> devel

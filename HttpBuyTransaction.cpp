@@ -19,19 +19,21 @@ bool HttpBuyTransaction::send(char* badge, int product, unsigned long time)
     char timeString[11];
     
     snprintf(productString, sizeof(productString), "%d", product);
-    snprintf(timeString, sizeof(timeString), "%lu", time);
+    sprintf(timeString, "%lu", time);
+    Serial.println(timeString);
 
     HashBuilder hashBuilder;
     hashBuilder.print(badge);
     hashBuilder.print(productString);
     hashBuilder.print(timeString);
     
-    StaticJsonBuffer<JSON_OBJECT_SIZE(4)> jsonBuffer;
+    StaticJsonBuffer<JSON_OBJECT_SIZE(5)+12> jsonBuffer;
     JsonObject& json = jsonBuffer.createObject();
+    json["Tid"] = "1";
     json["Badge"] = badge;
     json["Hash"] = hashBuilder.getHash();
     json["Product"] = productString;
-    json["Time"] = timeString;
+    json["Time"] = (const char*)timeString;
     json.printTo(buffer, sizeof(buffer));
 
     return http.query("POST " API_PATH "/buy", buffer, sizeof(buffer));
@@ -41,17 +43,19 @@ bool HttpBuyTransaction::sendForBalance(char* badge, unsigned long time)
 {
     char timeString[11];
     
-    snprintf(timeString, sizeof(timeString), "%lu", time);
+    sprintf(timeString, "%lu", time);
+    Serial.println(timeString);
 
     HashBuilder hashBuilder;
     hashBuilder.print(badge);
     hashBuilder.print(timeString);
     
-    StaticJsonBuffer<JSON_OBJECT_SIZE(4)> jsonBuffer;
+    StaticJsonBuffer<JSON_OBJECT_SIZE(4)+12> jsonBuffer;
     JsonObject& json = jsonBuffer.createObject();
+    json["Tid"] = "1";
     json["Badge"] = badge;
     json["Hash"] = hashBuilder.getHash();
-    json["Time"] = timeString;
+    json["Time"] = (const char*)timeString;
     json.printTo(buffer, sizeof(buffer));
 
     return http.query("POST " API_PATH "/balance", buffer, sizeof(buffer));

@@ -29,26 +29,36 @@ public:
         if(res)
           Serial.println("Send OK");
         else
+        {
           Serial.println("Send NOK");
+          return false;
+        }
+    
 
         res = parse();
         if(res)
           Serial.println("parse OK");
         else
+        {
           Serial.println("parse NOK");
+          return false;
+        }
 
         res = validate();
         if(res)
           Serial.println("validate OK");
         else
+        {
           Serial.println("validate NOK");
+          return false;
+        }
           
 
-        return send() && parse() && validate();
+        return true;
     }
 
     void getCatalog(Catalog&);
-    unsigned long getTime() { return strtoul(time, 0, 10); }
+    unsigned long getTime() { return time/*strtoul(time, 0, 10)*/; }
 
 private:
 
@@ -57,9 +67,9 @@ private:
     bool validate();
 
     HttpClient& http;
-    static const int buffer_size = 512; //increased for bigger JSON
+    static const int buffer_size = 768; //increased for bigger JSON
     char buffer[buffer_size];    
-    const char* time;
+    unsigned long time;
     const char* header;
     const char* products[Catalog::MAX_PRODUCT_COUNT + 1];
     const char* dbID[Catalog::MAX_PRODUCT_COUNT + 1];

@@ -32,7 +32,7 @@
 #define IDLE_PERIOD    15000UL  // 15 seconds
 #define TINY_WAIT 250UL //250 ms
 
-char auth[] = "xxxxxxxxxxxxxxxx";
+char auth[] = "xxxxx";
 WidgetTerminal terminal(V0);
 
 static Encoder encoder;
@@ -56,6 +56,9 @@ void setup()
 {
   Serial.begin(9600);
 
+  pinMode(PIN_RELAY, OUTPUT);
+  digitalWrite(PIN_RELAY, HIGH);
+
   Serial.println("Starting display...");
   display.begin();
   display.setBacklight(255);
@@ -63,10 +66,6 @@ void setup()
 
   Serial.println("Starting encoder...");
   encoder.begin();
-
-//  byte myOct[4] = {10,42,129,11};
-//  for(int i=0;i<4;i++) //+4 because we want to change the pos in EEPROM
-//      writeEEPROM(i, myOct[i]);
       
   Serial.println("Getting IP...");
   getIP();  //Previously used to manually set IP, otherwise use default....now used to get IP from EEPROM
@@ -85,25 +84,21 @@ void setup()
   Serial.println("Starting RFID...");
   rfid.begin();
 
-  pinMode(PIN_RELAY, OUTPUT);
-  digitalWrite(PIN_RELAY, HIGH);
-
-  Serial.println("Starting SYNC...");
-  lastSyncTime = millis();
-  while (!sync() && (lastSyncTime+IDLE_PERIOD)>millis() )
-  {
-    display.setText(0, "Sync failed...");
-    display.setText(1, "Trying again.");
-    delay(5000);    
-  }
-  lastSyncTime = 0;
-  
   display.setText(0, "Blynk connect...");
   display.setText(1, "Plz wait :)");
-  //Blynk.begin(auth);
   Blynk.config(auth);
   Blynk.connect(2000); //2000 * 3ms (blynk default) = 6 seconds
   terminal.flush();
+
+   Serial.println("Starting SYNC...");
+  lastSyncTime = millis();
+  while (!sync())
+  {
+    display.setText(0, "Sync failed...");
+    display.setText(1, "Trying again.");
+    delay(3000);    
+  }
+  lastSyncTime = 0;
 }
 
 void loop()
@@ -149,7 +144,7 @@ void loop()
   }
   else if (btnPressed) //case button pressed but no badge presented
   {
-    Serial.println("Button pressed...cash trasnaction");
+    Serial.println("Button pressed...cash transaction");
     encoder.ledChange(true, false, false);
     display.setText(0, "Cash payment");
     display.setText(1, "Not implemented");
@@ -170,7 +165,7 @@ void loop()
     {
       if (!sync())
       {
-        delay(5000);
+        delay(2000);
       }
       return;
     }
@@ -358,8 +353,9 @@ void getIP()
   for(int i=0;i<4;i++)
   {
     myIP[i] = EEPROM.read(i+4);
-    Serial.println(myIP[i]);
+    Serial.print(myIP[i]);
   }
+  Serial.println();
 
   return;
 

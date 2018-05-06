@@ -9,7 +9,7 @@
 #ifndef _CONFIGURATION_H
 #define _CONFIGURATION_H
 
-#define PRIVATE_KEY {'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'}
+#define PRIVATE_KEY {'1','1','1','1','1','1','1','1','1','1','1','1','1','3','3','7'}
 
 #define MAC_ADDRESS {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED}
 
@@ -24,5 +24,7 @@
 #define MAX_PRODUCTS 20
 
 #define API_PATH    "" //"/DrinkingBuddy"
+
+#define TERMINAL_ID    1 //0 for the old terminal on the fridge
  
 #endif

@@ -20,7 +20,7 @@ public:
     {
     }
 
-    bool perform(char* badge, int product, unsigned long time)
+    bool perform(char* badge, char* product, unsigned long time)
     {
         return send(badge, product, time) && parse() && validate();
     }
@@ -30,13 +30,19 @@ public:
         return sendForBalance(badge, time) && parse() && validate();
     }
 
+    bool addItems(char* badge, char* barcode, char* itemCount, unsigned long time)
+    {
+        return add(badge, barcode, itemCount, time) && parse() && validate();
+    }
+
     const char* getMelody() { return melody; }
     const char* getError() { return error; }
     const char* getMessage(int i) { return messages[i]; }
 
 private:
 
-    bool send(char*, int, unsigned long);
+    bool send(char*, char*, unsigned long);
+    bool add(char*, char*, char*, unsigned long);
     bool sendForBalance(char*, unsigned long);
     bool parse();
     bool validate();

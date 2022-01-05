@@ -8,7 +8,7 @@
 
 #include <Arduino.h>
 #include <SPI.h>
-#include <Ethernet.h>
+//#include <Ethernet.h>
 #include <Dns.h>
 
 #include "Configuration.h"
@@ -22,17 +22,13 @@
 void HttpClient::begin(const byte* ip)
 {
 
-    //pinMode(4, OUTPUT);
-    //pinMode(10, OUTPUT);
-    //digitalWrite(4, HIGH);
-    //digitalWrite(10, LOW);
-    delay(100);
-    Serial.begin(9600);
+    //delay(100);
+    //Serial.begin(9600);
 
-    byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
+    //byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
     
     
-    byte myip[4]; //for some reason just passing ip doesnt work, so I copied it again....needs to be rewritten properly
+    /*byte myip[4]; //for some reason just passing ip doesnt work, so I copied it again....needs to be rewritten properly
     for(int i=0;i<4;i++)
       myip[i] = ip[i];
     
@@ -60,7 +56,7 @@ void HttpClient::begin(const byte* ip)
     
     DNSClient dns;
 
-    dns.begin(Ethernet.dnsServerIP());
+    //dns.begin(Ethernet.dnsServerIP());
 
     while (1 != dns.getHostByName(SERVER_NAME, serverIp))
     {
@@ -70,7 +66,7 @@ void HttpClient::begin(const byte* ip)
 
     Serial.print("Address=");
     Serial.println(serverIp);
-
+*/
 }
 
 void HttpClient::readln(char* buffer, int size)

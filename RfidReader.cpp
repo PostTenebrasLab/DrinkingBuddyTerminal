@@ -51,22 +51,6 @@ char* RfidReader::tryRead()
     for(int i=0; i<mfrc522.uid.size; i++) {
       sprintf(&buffer[i*2], "%02X", (int)mfrc522.uid.uidByte[i]);
     }
- 
-//    if (buffer[0] != 2 || buffer[13] != 3)
-//    {
-//        rfid.flush();
-//        Serial.println("RFID unsynced !");
-//        return NULL;
-//    }
-
-//    byte readCheckSum = parseHexByte(buffer + 11);
-//    byte computedCheckSum = computeCheckSum(buffer + 1);
-//
-//    if (readCheckSum != computedCheckSum)
-//    {
-//        Serial.println("RFID checksum !");
-//        return NULL;
-//    }
 
     return buffer;
 }

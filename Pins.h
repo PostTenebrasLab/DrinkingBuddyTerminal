@@ -10,44 +10,23 @@
 #define _PINS_H
 
 
-#define PIN_BTN_LEFT   2 //obsolète
-#define PIN_BTN_RIGHT  3 //obsolète
 
-#define ledRED 6
-#define ledGREEN 7  //même que buzzer, faut changer
-#define ledBLUE 8
+#define PIN_RFID_RESET -1
+#define PIN_RFID_SS    D4
 
-#define encoder0PinA  2   //Rotary encoder
-#define encoder0PinB  4   //Rotary encoder
-#define encoder0Press 3   //For the button on the rotary  encoder
+//#define PIN_RELAY       9
 
-// RGB Led
-#define ledRED   17
-#define ledGREEN 16
-#define ledBLUE  15
-
-// Rotary encoder
-#define encoder0PinA  21   //pinA
-#define encoder0PinB  19   //pinB
-#define encoder0Press 18   //Button
+#define PIN_BUZZER       D1
 
 
-#define PIN_LCD_LIGHT  23
-#define PIN_LCD_RS     35
-#define PIN_LCD_EN     33
-#define PIN_LCD_D4     31
-#define PIN_LCD_D5     29
-#define PIN_LCD_D6     27 
-#define PIN_LCD_D7     25
+#define PIN_BARCODE_EN       -1 //Enable and disable the GND pin of the reader....should be D3, but RFID doesnt work when d3 is chosen
+#define PIN_BARCODE_RX       D2
+#define PIN_BARCODE_TX       -1
 
-#define PIN_RFID_RESET 42
-#define PIN_RFID_SS    44
-#define PIN_RFID_MISO  50
-#define PIN_RFID_MOSI  51
-#define PIN_RFID_CLK   52
+//These are defined in the user_setup.h in the TFT_eSPI library...here for reference only
+//#define TFT_CS   D0  // Chip select control pin D8
+//#define TFT_DC   D8  // Data Command control pin
+//#define TFT_RST  -1 
 
-#define PIN_BUZZER      8 // CORRECT VALUE = 8
-
-#define PIN_RELAY       9
 
 #endif

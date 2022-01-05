@@ -13,12 +13,12 @@
 #include "HashBuilder.h"
 #include "HttpBuyTransaction.h"
 
-bool HttpBuyTransaction::send(char* badge, int product, unsigned long time)
+bool HttpBuyTransaction::send(char* badge, char* productString, unsigned long time)
 {
-    char productString[6];
+    //char productString[6];
     char timeString[11];
     
-    snprintf(productString, sizeof(productString), "%d", product);
+    //snprintf(productString, sizeof(productString), "%d", product);
     sprintf(timeString, "%lu", time);
     Serial.println(timeString);
 
@@ -27,12 +27,12 @@ bool HttpBuyTransaction::send(char* badge, int product, unsigned long time)
     hashBuilder.print(productString);
     hashBuilder.print(timeString);
     
-    StaticJsonBuffer<JSON_OBJECT_SIZE(5)+12> jsonBuffer;
+    StaticJsonBuffer<JSON_OBJECT_SIZE(6)+20> jsonBuffer;
     JsonObject& json = jsonBuffer.createObject();
-    json["Tid"] = "1";
+    json["Tid"] = "4";   //////////---------------------------------------> Change HERE
     json["Badge"] = badge;
     json["Hash"] = hashBuilder.getHash();
-    json["Product"] = productString;
+    json["Barcode"] = productString;
     json["Time"] = (const char*)timeString;
     json.printTo(buffer, sizeof(buffer));
 
@@ -52,13 +52,40 @@ bool HttpBuyTransaction::sendForBalance(char* badge, unsigned long time)
     
     StaticJsonBuffer<JSON_OBJECT_SIZE(4)+12> jsonBuffer;
     JsonObject& json = jsonBuffer.createObject();
-    json["Tid"] = "1";
+    json["Tid"] = "4";   //////////---------------------------------------> Change HERE
     json["Badge"] = badge;
     json["Hash"] = hashBuilder.getHash();
     json["Time"] = (const char*)timeString;
     json.printTo(buffer, sizeof(buffer));
 
     return http.query("POST " API_PATH "/balance", buffer, sizeof(buffer));
+}
+
+bool HttpBuyTransaction::add(char* badge, char* barcodeString, char* itemCount, unsigned long time)
+{
+    //char productString[6];
+    char timeString[11];
+    
+    //snprintf(productString, sizeof(productString), "%d", product);
+    sprintf(timeString, "%lu", time);
+    Serial.println(timeString);
+
+    HashBuilder hashBuilder;
+    hashBuilder.print(badge);
+    hashBuilder.print(barcodeString);
+    hashBuilder.print(timeString);
+    
+    StaticJsonBuffer<JSON_OBJECT_SIZE(6)+32> jsonBuffer;
+    JsonObject& json = jsonBuffer.createObject();
+    json["Tid"] = "4";   //////////---------------------------------------> Change HERE
+    json["Badge"] = badge;
+    json["Hash"] = hashBuilder.getHash();
+    json["Barcode"] = barcodeString;
+    json["Item_count"] = itemCount;
+    json["Time"] = (const char*)timeString;
+    json.printTo(buffer, sizeof(buffer));
+
+    return http.query("POST " API_PATH "/add", buffer, sizeof(buffer));
 }
 
 bool HttpBuyTransaction::parse()

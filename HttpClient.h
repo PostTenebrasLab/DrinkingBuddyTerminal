@@ -9,7 +9,8 @@
 #ifndef _HTTPCLIENT_H
 #define _HTTPCLIENT_H
 
-#include <Ethernet.h>
+//#include <Ethernet.h>
+#include "ESP8266WiFi.h"
 
 class HttpClient
 {
@@ -27,7 +28,7 @@ private:
     void readln(char*, int);
 
     IPAddress serverIp;
-    EthernetClient client;
+    WiFiClient client;
     
 
 };

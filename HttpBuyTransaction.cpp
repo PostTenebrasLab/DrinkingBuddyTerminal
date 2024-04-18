@@ -15,10 +15,8 @@
 
 bool HttpBuyTransaction::send(char* badge, char* productString, unsigned long time)
 {
-    //char productString[6];
-    char timeString[11];
+    char timeString[16];
     
-    //snprintf(productString, sizeof(productString), "%d", product);
     sprintf(timeString, "%lu", time);
     Serial.println(timeString);
 
@@ -27,21 +25,48 @@ bool HttpBuyTransaction::send(char* badge, char* productString, unsigned long ti
     hashBuilder.print(productString);
     hashBuilder.print(timeString);
     
-    StaticJsonBuffer<JSON_OBJECT_SIZE(6)+20> jsonBuffer;
-    JsonObject& json = jsonBuffer.createObject();
-    json["Tid"] = "4";   //////////---------------------------------------> Change HERE
+    JsonObject json = jsonBuffer.to<JsonObject>();
+    json["Tid"] = TERMINAL_ID;
     json["Badge"] = badge;
     json["Hash"] = hashBuilder.getHash();
     json["Barcode"] = productString;
     json["Time"] = (const char*)timeString;
-    json.printTo(buffer, sizeof(buffer));
+    //json.printTo(buffer, sizeof(buffer));
+    serializeJson(json, buffer, sizeof(buffer));
 
-    return http.query("POST " API_PATH "/buy", buffer, sizeof(buffer));
+    http.useHTTP10(true);
+
+    char request[32];
+    snprintf(request, 32, "%s%s", API_PATH, "/buy");
+    http.begin(*client_, SERVER_NAME, SERVER_PORT, request, false);
+    http.addHeader("Content-Type", "application/json");
+    int ret = http.POST(buffer);
+
+    if(ret != HTTP_CODE_OK) {
+      Serial.print(F("/buy returned error ("));
+      Serial.print(ret);
+      Serial.print(F(") : "));
+      Serial.println(HTTPClient::errorToString(ret));
+      return false;
+    }
+
+    // Read response
+    DeserializationError deserialError = deserializeJson(jsonBuffer, http.getStream());
+    if (deserialError) {
+        Serial.print(F("JSON error : deserializeJson() failed with code "));
+        Serial.println(deserialError.c_str());
+        strcpy(error_, "JSON deserialization error");
+        return false;
+    }
+    // Disconnect
+    http.end();
+
+    return true;
 }
 
 bool HttpBuyTransaction::sendForBalance(char* badge, unsigned long time)
 {
-    char timeString[11];
+    char timeString[16];
     
     sprintf(timeString, "%lu", time);
     Serial.println(timeString);
@@ -50,21 +75,55 @@ bool HttpBuyTransaction::sendForBalance(char* badge, unsigned long time)
     hashBuilder.print(badge);
     hashBuilder.print(timeString);
     
-    StaticJsonBuffer<JSON_OBJECT_SIZE(4)+12> jsonBuffer;
-    JsonObject& json = jsonBuffer.createObject();
-    json["Tid"] = "4";   //////////---------------------------------------> Change HERE
+    JsonObject json = jsonBuffer.to<JsonObject>();
+    json["Tid"] = TERMINAL_ID;
     json["Badge"] = badge;
     json["Hash"] = hashBuilder.getHash();
     json["Time"] = (const char*)timeString;
-    json.printTo(buffer, sizeof(buffer));
+    serializeJson(json, buffer, sizeof(buffer));
 
-    return http.query("POST " API_PATH "/balance", buffer, sizeof(buffer));
+    Serial.print(F("/balance request json buffer usage : "));
+    Serial.println(jsonBuffer.memoryUsage());
+
+    Serial.print(F("JSON request: "));
+    Serial.println(buffer);
+
+    http.useHTTP10(true);
+
+    char request[32];
+    snprintf(request, 32, "%s%s", API_PATH, "/balance");
+    http.begin(*client_, SERVER_NAME, SERVER_PORT, request, false);
+    http.addHeader("Content-Type", "application/json");
+    int ret = http.POST(buffer);
+
+    if(ret != HTTP_CODE_OK) {
+      Serial.print(F("/balance returned error ("));
+      Serial.print(ret);
+      Serial.print(F(") : "));
+      Serial.println(HTTPClient::errorToString(ret));
+      return false;
+    }
+    
+    // Read response
+    DeserializationError deserialError = deserializeJson(jsonBuffer, http.getStream());
+    if (deserialError) {
+        Serial.print(F("JSON error : deserializeJson() failed with code "));
+        Serial.println(deserialError.c_str());
+        strcpy(error_, "JSON deserialization error");
+        return false;
+    }
+    Serial.print(F("/balance reply json buffer usage : "));
+    Serial.println(jsonBuffer.memoryUsage());
+
+    // Disconnect
+    http.end();
+
+    return true;
 }
 
 bool HttpBuyTransaction::add(char* badge, char* barcodeString, char* itemCount, unsigned long time)
 {
-    //char productString[6];
-    char timeString[11];
+    char timeString[16];
     
     //snprintf(productString, sizeof(productString), "%d", product);
     sprintf(timeString, "%lu", time);
@@ -75,61 +134,102 @@ bool HttpBuyTransaction::add(char* badge, char* barcodeString, char* itemCount, 
     hashBuilder.print(barcodeString);
     hashBuilder.print(timeString);
     
-    StaticJsonBuffer<JSON_OBJECT_SIZE(6)+32> jsonBuffer;
-    JsonObject& json = jsonBuffer.createObject();
-    json["Tid"] = "4";   //////////---------------------------------------> Change HERE
+    JsonObject json = jsonBuffer.to<JsonObject>();
+    json["Tid"] = TERMINAL_ID;
     json["Badge"] = badge;
     json["Hash"] = hashBuilder.getHash();
     json["Barcode"] = barcodeString;
     json["Item_count"] = itemCount;
     json["Time"] = (const char*)timeString;
-    json.printTo(buffer, sizeof(buffer));
+    serializeJson(json, buffer, sizeof(buffer));
 
-    return http.query("POST " API_PATH "/add", buffer, sizeof(buffer));
+    Serial.print("/add json buffer usage : ");
+    Serial.println(jsonBuffer.memoryUsage());
+
+    http.useHTTP10(true); // needed to deserialize stream
+
+    char request[32];
+    snprintf(request, 32, "%s%s", API_PATH, "/add");
+    http.begin(*client_, SERVER_NAME, SERVER_PORT, request, false);
+    http.addHeader("Content-Type", "application/json");
+    int ret = http.POST(buffer);
+    
+    if(ret != HTTP_CODE_OK) {
+      Serial.print(F("/add returned error ("));
+      Serial.print(ret);
+      Serial.print(F(") : "));
+      Serial.println(HTTPClient::errorToString(ret));
+      return false;
+    }
+
+    // Read response
+    DeserializationError deserialError = deserializeJson(jsonBuffer, http.getStream());
+    if (deserialError) {
+        Serial.print(F("JSON error : deserializeJson() failed with code "));
+        Serial.println(deserialError.c_str());
+        strcpy(error_, "JSON deserialization error");
+        return false;
+    }
+    Serial.println(jsonBuffer.memoryUsage());
+    //const String& reply = http.getString();
+    //strncpy(buffer, reply.c_str(), sizeof(buffer));
+    //buffer[sizeof(buffer)-1] = '\0';
+
+    // Disconnect
+    http.end();
+
+    return true;
 }
 
 bool HttpBuyTransaction::parse()
 {
-    StaticJsonBuffer<JSON_OBJECT_SIZE(4)+JSON_ARRAY_SIZE(2)> jsonBuffer;
+    const char* melody = jsonBuffer["Melody"];
+    if (melody == NULL) {Serial.println(F("No melody sent")); strcpy(error_, "No melody sent"); return false;}
+    strcpy(melody_, melody);
 
-    JsonObject& root = jsonBuffer.parseObject(buffer);
-    if (!root.success()) {Serial.println("JSON error"); error = "JSON error"; return false;}
-
-    melody = root["Melody"];
-    if (melody == NULL) {Serial.println("No melody sent"); error = "No melody sent"; return false;}
-
-    JsonArray& messageArray = root["Message"];
-    if (!messageArray.success()) return false;
+    const char* hash = jsonBuffer["Hash"];
+    if (hash == NULL) {Serial.println(F("No hash sent")); strcpy(error_, "No hash sent"); return false;}
+    strcpy(hash_, hash);
     
-    messages[0] = messageArray[0];
-    messages[1] = messageArray[1];
+    time_ = jsonBuffer["Time"];
+    if (time_ == 0) {Serial.println(F("No time sent")); strcpy(error_, "No time sent"); return false;}
 
-    time = root["Time"];
-    if (time == NULL) {Serial.println("No time sent"); error = "No time sent"; return false;}
+    JsonArray messageArray = jsonBuffer["Message"];
+    if (!messageArray) { Serial.println(F("No message sent")); strcpy(error_, "No message sent"); return false;}
+    strcpy(messages_[0], messageArray[0]);
+    strcpy(messages_[1], messageArray[1]);
 
-    hash = root["Hash"];
-    if (hash == NULL) {Serial.println("No hash sent"); error = "No hash sent"; return false;}
-
+    if(jsonBuffer.containsKey("ItemPrice")) {
+      itemPrice_ = jsonBuffer["ItemPrice"];
+      snprintf(itemPriceStr_, sizeof(itemPriceStr_), "%2d.%2d", itemPrice_/100, itemPrice_-((itemPrice_/100)*100));
+      itemPriceStr_[sizeof(itemPriceStr_)-1] = '\0';
+    }
+    else {
+      itemPrice_ = 0;
+      itemPriceStr_[0] = '\0';
+    }
+    
     return true;
 }
 
 bool HttpBuyTransaction::validate()
 {
+    char timeStr[16];
     HashBuilder hashBuilder;
-    hashBuilder.print(melody);
-    hashBuilder.print(messages[0]);
-    hashBuilder.print(messages[1]);
-    hashBuilder.print(time);
+    hashBuilder.print(melody_);
+    hashBuilder.print(messages_[0]);
+    hashBuilder.print(messages_[1]);
+    hashBuilder.print(ltoa(time_, timeStr, 10));
 
-    if(strcasecmp(hash, hashBuilder.getHash()) == 0)
+    if(strcasecmp(hash_, hashBuilder.getHash()) == 0)
       return true;
     else
     {
-      Serial.print("Hash incorrect received: ");
-      Serial.print(hash); Serial.print(" expecting "); Serial.println(hashBuilder.getHash());
-      Serial.print("Time: "); Serial.println(time);
+      Serial.print(F("Hash incorrect received: "));
+      Serial.print(hash_); Serial.print(F(" expecting ")); Serial.println(hashBuilder.getHash());
+      Serial.print(F("Time: ")); Serial.println(time_);
       
-      error = "Hash incorrect";
+      strcpy(error_, "Hash incorrect");
       return false;
     }
 }

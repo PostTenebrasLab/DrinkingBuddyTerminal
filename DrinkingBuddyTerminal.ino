@@ -1,31 +1,29 @@
+#include "Configuration.h"
+
 #include <ESP8266WiFi.h>
 #include <SPI.h>
 #include <ArduinoJson.h>
 #include <TFT_eSPI.h> // Hardware-specific library
 
 #include <MFRC522.h>
-#include <DNSServer.h>
 
-#include <ESP8266WebServer.h>
+#include <ESP8266HTTPClient.h>
 #include "WiFiManager.h"          //https://github.com/tzapu/WiFiManager
 
+#include <NTPClient.h>
+#include <WiFiUdp.h>
 
 #include "Barcode.h"
 #include "Clock.h"
 #include "HttpBuyTransaction.h"
-#include "HttpClient.h"
-#include "HttpSyncTransaction.h"
 #include "RfidReader.h"
 #include "Sound.h"
 
 
 static RfidReader rfid;
-static Clock clock;
+static MyClock myclock;
 Barcode barcode(PIN_BARCODE_RX,PIN_BARCODE_TX,PIN_BARCODE_EN);
 static Sound sound;
-
-
-static HttpClient http;
 
 unsigned long previousMillis = 0;
 const long interval = 20000; //20 secs
@@ -33,7 +31,11 @@ const long interval = 20000; //20 secs
 char lastBadge[10] = "";
 char lastBarcode[20] = "";
 
-
+WiFiClient client;
+//HttpBuyTransaction dbTransaction(client);
+const long utcOffsetInSeconds = 0; // UTC (use 3600 for UTC+1 and 7200 for UTC+2) but UTC is fine for EPOCH
+WiFiUDP ntpUDP;
+NTPClient timeClient(ntpUDP, "pool.ntp.org", utcOffsetInSeconds);
 
 TFT_eSPI tft = TFT_eSPI();       // Invoke custom library
 TFT_eSprite img = TFT_eSprite(&tft);
@@ -235,10 +237,10 @@ void setup() {
     Serial.begin(115200);
     sound.play("a1");
     SPI.begin();           // Init SPI bus
-    //mfrc522.PCD_Init();    // Init MFRC522
+    Serial.println(F("Starting RFID..."));
     rfid.begin();
+    Serial.println(F("Starting tft and wifi..."));
     iniTFT();
-    Serial.println("Starting tft and wifi...");
     tft.setTextColor(ILI9341_WHITE);
     //tft.setTextSize(2);
     printTft("Starting wifi...");
@@ -254,23 +256,35 @@ void setup() {
     //here  "AutoConnectAP"
     //and goes into a blocking loop awaiting configuration
     if(!wifiManager.autoConnect()) {
-      Serial.println("failed to connect and hit timeout");
+      Serial.println(F("failed to connect and hit timeout"));
       //reset and try again, or maybe put it to deep sleep
       //ESP.reset();
       delay(1000);
     } 
-    Serial.println("Wifi connected...yay :)");
+    Serial.println(F("Wifi connected...yay :)"));
     printTft("Wifi connected...yay :)");
 
-    Serial.println("Starting RFID...");
-    printTft("Starting RFID...");
-    SPI.begin();           // Init SPI bus
-    //mfrc522.PCD_Init();    // Init MFRC522
-    rfid.begin();
-    barcode.begin();
-    //barcode.disable();
+    timeClient.begin();
+    timeClient.update();
+    if(timeClient.isTimeSet()) {
+      myclock.setUnixTime(timeClient.getEpochTime());
+      String formattedTime = timeClient.getFormattedTime();
+      Serial.print(F("NTP Time: "));
+      Serial.println(formattedTime);
+      printTftnoln("NTP Time: ");
+      printTft(formattedTime.c_str());
+    }
+    else {
+      Serial.println(F("NTP Time: Failed to get time"));
+      printTft("NTP Time: Failed to get time");
+    }
 
-    
+    client.setNoDelay(true);
+    client.setSync(true);
+
+    // rfid.begin();
+    barcode.begin();
+
     tft.setTextColor(ILI9341_RED);
     //tft.setTextSize(2);
     printTft("Swipe your card");
@@ -287,8 +301,8 @@ void loop() {
     clearScreen();
     
     strcpy(lastBadge,badge);
-    Serial.print("badge found "); Serial.println(badge);
-    Serial.print("Last badge changed to: "); Serial.println(lastBadge);
+    Serial.print(F("badge found ")); Serial.println(badge);
+    Serial.print(F("Last badge changed to: ")); Serial.println(lastBadge);
     printTft("Found badge");
 
     barcode.flush(); //empty the buffer before we start the buy cycle, otherwise things will be bought by mistake
@@ -297,12 +311,12 @@ void loop() {
     {
       barcode.enable();//something is not right with the class, doesnt work properly 
       //digitalWrite(PIN_BARCODE_EN, HIGH); //something is not right with the class, doesnt work properly 
-      Serial.println("Activating barcode reader");
+      Serial.println(F("Activating barcode reader"));
       previousMillis = millis();
-      printTft("Fridge is open for 5 sec"); 
+      //printTft("Fridge is open for 5 sec"); 
       printTft("Please scan barcode");      
       while(millis() - previousMillis < interval) //keep scanning codes until it timesout
-      {      
+      {
         if(!waitForBarcode())
         {
           logOut();
@@ -310,10 +324,10 @@ void loop() {
         }
         int myRes = barcode.get(lastBarcode,20);
         if(myRes == -1)
-          Serial.println("Error barcode");          
+          Serial.println(F("Error barcode"));          
         else
         {
-          Serial.print("Barcode read: ");Serial.print(lastBarcode);Serial.print(" - size: ");Serial.println(myRes);
+          Serial.print(F("Barcode read: "));Serial.print(lastBarcode);Serial.print(F(" - size: "));Serial.println(myRes);
           if(checkAdminBarcode(lastBarcode))
           {
             int myTotal = 0;
@@ -335,7 +349,7 @@ void loop() {
                 }
                 else
                 {
-                  Serial.print("Total to be added: "); Serial.println(myTotal);
+                  Serial.print(F("Total to be added: ")); Serial.println(myTotal);
                   
                   printTft("Scan item to add");
                   sprintf(bufTotal, "%i", myTotal);
@@ -370,7 +384,7 @@ void loop() {
             }
             else
             {
-              Serial.println("buy NOK");
+              Serial.println(F("buy NOK"));
               previousMillis = millis();// test only...need to move to the OK section
             }          
           }
@@ -388,12 +402,12 @@ void loop() {
 
 bool getUser(char* badge)
 {
-  HttpBuyTransaction dbTransaction(http);
+  HttpBuyTransaction dbTransaction(client);
 
-  Serial.println("Starting get user...");
-  if (!dbTransaction.getBalance(badge, clock.getUnixTime()))
+  Serial.println(F("Starting get user..."));
+  if (!dbTransaction.getBalance(badge, myclock.getUnixTime()))
   {
-    Serial.println("Error get user...");
+    Serial.println(F("Error get user..."));
     printTft("Error getting user info");    
     return false;
   }
@@ -403,7 +417,7 @@ bool getUser(char* badge)
     //lastBadge = "";
     //strcpy(lastBadge,"0");
     resetBadge();
-    Serial.print(" Unknown badge "); 
+    Serial.print(F(" Unknown badge ")); 
     printTft("Unknown badge");
     
     Serial.println(dbTransaction.getMessage(0));  
@@ -413,7 +427,7 @@ bool getUser(char* badge)
   }
   else
   {
-    Serial.println("OK user");
+    Serial.println(F("OK user"));
     Serial.println(dbTransaction.getMessage(0)); 
     Serial.println(dbTransaction.getMessage(1)); 
     printTftnoln(dbTransaction.getMessage(0)); printTftnoln(" - "); printTft(dbTransaction.getMessage(1));
@@ -424,11 +438,11 @@ bool getUser(char* badge)
 
 bool buyBarcode(char* badge, char* lastBarcode)
 {
-  HttpBuyTransaction dbTransaction(http);
+  HttpBuyTransaction dbTransaction(client);
 
-  if (!dbTransaction.perform(badge, lastBarcode, clock.getUnixTime()))
+  if (!dbTransaction.perform(badge, lastBarcode, myclock.getUnixTime()))
   {
-    Serial.println("Error buy barcode");
+    Serial.println(F("Error buy barcode"));
     printTft("Error buy barcode");
     printTft(lastBarcode);
     
@@ -440,7 +454,7 @@ bool buyBarcode(char* badge, char* lastBarcode)
   {
     //lastBadge = "";
     
-    Serial.print(" Too poor "); 
+    Serial.print(F(" Too poor ")); 
     printTft("Not enough credit, too poor");
     
     Serial.println(dbTransaction.getMessage(0)); 
@@ -451,11 +465,18 @@ bool buyBarcode(char* badge, char* lastBarcode)
   }
   else
   {
-    Serial.println("OK buy");
+    Serial.println(F("OK buy"));
     Serial.println(dbTransaction.getMessage(0)); 
     Serial.println(dbTransaction.getMessage(1)); 
+    Serial.print(F("Price of last item :"));
+    Serial.println(dbTransaction.getItemPriceStr());
+    Serial.print(F("============================"));
+
     printTft(dbTransaction.getMessage(0));
     printTft(dbTransaction.getMessage(1));
+    printTftnoln("Price of last item :");
+    printTft(dbTransaction.getItemPriceStr());
+    printTft("============================");
     sound.play(dbTransaction.getMelody());
     resetBarcode();
 
@@ -465,11 +486,11 @@ bool buyBarcode(char* badge, char* lastBarcode)
 
 bool addBarcode(char* badge, char* lastBarcode, char* itemCount)
 {
-  HttpBuyTransaction dbTransaction(http);
+  HttpBuyTransaction dbTransaction(client);
 
-  if (!dbTransaction.addItems(badge, lastBarcode, itemCount, clock.getUnixTime()))
+  if (!dbTransaction.addItems(badge, lastBarcode, itemCount, myclock.getUnixTime()))
   {
-    Serial.println("Error add barcode");
+    Serial.println(F("Error add barcode"));
     printTft("Error add barcode");
     printTft(lastBarcode);
     
@@ -481,7 +502,7 @@ bool addBarcode(char* badge, char* lastBarcode, char* itemCount)
   {
     //lastBadge = "";
     
-    Serial.print(" Barcode does not exist "); 
+    Serial.print(F(" Barcode does not exist ")); 
     printTft("Barcode does not exist");
     printTft(lastBarcode);
     printTft(dbTransaction.getMessage(1));
@@ -494,7 +515,7 @@ bool addBarcode(char* badge, char* lastBarcode, char* itemCount)
   }
   else
   {
-    Serial.println("OK add");
+    Serial.println(F("OK add"));
     Serial.println(dbTransaction.getMessage(0)); 
     Serial.println(dbTransaction.getMessage(1)); 
     printTft(dbTransaction.getMessage(0));
@@ -506,7 +527,7 @@ bool addBarcode(char* badge, char* lastBarcode, char* itemCount)
 }
 
 void configModeCallback (WiFiManager *myWiFiManager) {
-  Serial.println("Entered config mode");
+  Serial.println(F("Entered config mode"));
   Serial.println(WiFi.softAPIP());
   printTft("Wifi in config mode");
   //if you used auto generated SSID, print it
@@ -525,10 +546,10 @@ void resetBarcode()
 
 bool checkAdminBarcode(const char* myBarcode)
 {
-  if(strcmp(myBarcode,"ptl_admin")== 0 || strcmp(myBarcode,"ptl_admin\r\n")== 0)
+  if(!strncmp("ptl_admin", myBarcode, strlen("ptl_admin")))
   {
     printTft("Admin mode activated");
-    Serial.println("Admin mode started");
+    Serial.println(F("Admin mode started"));
     return true;
   }
   
@@ -537,10 +558,10 @@ bool checkAdminBarcode(const char* myBarcode)
 
 bool checkAddcashBarcode(const char* myBarcode)
 {
-  if(strcmp(myBarcode,"ptl_add_money")== 0 || strcmp(myBarcode,"ptl_add_money\r\n")== 0)
+  if(!strncmp("ptl_add_money", myBarcode, strlen("ptl_add_money")))
   {
     printTft("Adding cash");
-    Serial.println("Add cash mode started");
+    Serial.println(F("Add cash mode started"));
     return true;
   }
 
@@ -550,10 +571,10 @@ bool checkAddcashBarcode(const char* myBarcode)
 bool doneBarcode(const char* myBarcode)
 {
   Serial.println(myBarcode);
-  if(strcmp(myBarcode,"done")== 0 || strcmp(myBarcode,"done\r\n")== 0)
+  if(!strncmp("done", myBarcode, strlen("done")))
   {
     printTft("Done...");
-    Serial.println("End special mode");
+    Serial.println(F("End special mode"));
     return true;
   }
 
@@ -562,15 +583,15 @@ bool doneBarcode(const char* myBarcode)
 
 int barcodeToInt(const char* myBarcode)
 {
-  if(strcmp(myBarcode,"one")== 0 || strcmp(myBarcode,"one\r\n")== 0)
+  if(!strncmp("one", myBarcode, strlen("one")))
   {
     return 1;
   }
-  else if(strcmp(myBarcode,"five")== 0 || strcmp(myBarcode,"five\r\n")== 0)
+  else if(!strncmp("five", myBarcode, strlen("five")))
   {
     return 5;
   }
-  else if(strcmp(myBarcode,"ten")== 0 || strcmp(myBarcode,"ten\r\n")== 0)
+  else if(!strncmp("ten", myBarcode, strlen("ten")))
   {
     return 10;
   }
@@ -596,8 +617,8 @@ void logOut()
   sound.play("d3");
   //barcode.disable(); //something is not right with the class, doesnt work properly
   digitalWrite(PIN_BARCODE_EN, LOW); //something is not right with the class, doesnt work properly
-  Serial.println("Deactivating barcode reader");
-  Serial.println("Timeout...exiting");
+  Serial.println(F("Deactivating barcode reader"));
+  Serial.println(F("Timeout...exiting"));
   printTft("Timeout...logout");
   tft.setTextColor(ILI9341_RED);
   printTft("Swipe your card");

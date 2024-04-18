@@ -6,10 +6,10 @@
 * https://github.com/bblanchon/DrinksRfidTerminal
 */
 
-#ifndef _CLOCK_H
-#define _CLOCK_H
+#ifndef _MYCLOCK_H
+#define _MYCLOCK_H
 
-class Clock
+class MyClock
 {
 public:
 

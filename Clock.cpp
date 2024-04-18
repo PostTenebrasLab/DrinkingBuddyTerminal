@@ -10,12 +10,12 @@
 
 #include "Clock.h"
 
-void Clock::setUnixTime(unsigned long time)
+void MyClock::setUnixTime(unsigned long time)
 {
     zero = time - millis() / 1000;
 }
 
-unsigned long Clock::getUnixTime()
+unsigned long MyClock::getUnixTime()
 {
     return zero + millis() / 1000;
 }

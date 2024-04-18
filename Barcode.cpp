@@ -18,7 +18,7 @@ void Barcode::enable()
 {
   digitalWrite(enable_pin, HIGH);
   delay(250);
-  begin();
+  mySerial.flush();
 }
 void Barcode::disable()
 {
@@ -53,6 +53,10 @@ int Barcode::get(char* barcode, int size)
             barcode[index++] = inChar; // Store it
             //barcode[index] = '\0'; // Null terminate the string
         }
+        else {
+          flush();
+          break;
+        }
     }
     delay(500); //sometimes the text is sent over 2 lines because of a delay in serial connection
     while (mySerial.available() > 0)
@@ -62,6 +66,10 @@ int Barcode::get(char* barcode, int size)
             inChar = mySerial.read(); // Read a character
             barcode[index++] = inChar; // Store it
             //barcode[index] = '\0'; // Null terminate the string
+        }
+        else {
+          flush();
+          break;
         }
     }
     return index;

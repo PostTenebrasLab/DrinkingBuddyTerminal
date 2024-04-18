@@ -24,6 +24,7 @@
 #define PIN_BARCODE_TX       -1
 
 //These are defined in the user_setup.h in the TFT_eSPI library...here for reference only
+//#define ILI9341_DRIVER
 //#define TFT_CS   D0  // Chip select control pin D8
 //#define TFT_DC   D8  // Data Command control pin
 //#define TFT_RST  -1 

@@ -9,15 +9,21 @@
 #ifndef _HTTPBUYTRANSACTION_H
 #define _HTTPBUYTRANSACTION_H
 
-#include "HttpClient.h"
+#include <ESP8266HTTPClient.h>
 
 class HttpBuyTransaction
 {
 public:
 
-    HttpBuyTransaction(HttpClient& http)
-        :http(http)
+    HttpBuyTransaction(WiFiClient& client)
+        :client_(&client)
     {
+       buffer[0] = '\0';
+       hash_[0] = '\0';
+       messages_[0][0] = '\0';
+       messages_[1][0] = '\0';
+       melody_[0] = '\0';
+       error_[0] = '\0';
     }
 
     bool perform(char* badge, char* product, unsigned long time)
@@ -35,9 +41,11 @@ public:
         return add(badge, barcode, itemCount, time) && parse() && validate();
     }
 
-    const char* getMelody() { return melody; }
-    const char* getError() { return error; }
-    const char* getMessage(int i) { return messages[i]; }
+    const char* getMelody() { return melody_; }
+    const char* getError() { return error_; }
+    const char* getMessage(int i) { return messages_[i]; }
+    long getItemPrice() { return itemPrice_; }
+    const char* getItemPriceStr() { return itemPriceStr_; }
 
 private:
 
@@ -47,13 +55,17 @@ private:
     bool parse();
     bool validate();
 
-    HttpClient& http;
-    char buffer[150];
-    const char* hash;
-    const char* messages[2];
-    const char* melody;
-    const char* time;
-    const char* error;
+    WiFiClient* client_;
+    StaticJsonDocument<256> jsonBuffer;
+    HTTPClient http;
+    char buffer[256];
+    char hash_[20];
+    char messages_[2][32];
+    char melody_[32];
+    long time_;
+    char error_[48];
+    char itemPriceStr_[16];
+    long itemPrice_;
 };
 
 #endif

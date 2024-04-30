@@ -417,10 +417,13 @@ bool getUser(char* badge)
     //lastBadge = "";
     //strcpy(lastBadge,"0");
     resetBadge();
-    Serial.print(F(" Unknown badge ")); 
-    printTft("Unknown badge");
+    Serial.print(F(" Unknown badge "));
+    Serial.println(badge);  
+ 
+    printTftnoln("Unknown badge ");
+    printTft(badge);  
+
     
-    Serial.println(dbTransaction.getMessage(0));  
     sound.play(dbTransaction.getMelody());
     delay(1500);
     return false;

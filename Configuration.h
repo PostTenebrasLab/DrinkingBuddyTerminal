@@ -13,7 +13,7 @@
 
 #define SERVER_NAME "drinkingbuddy.lan.posttenebraslab.ch"
 
-#define SERVER_PORT 80 //5000
+#define SERVER_PORT 443 //5000
 
 #define API_PATH  ""
 

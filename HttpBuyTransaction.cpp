@@ -34,13 +34,13 @@ bool HttpBuyTransaction::send(char* badge, char* productString, unsigned long ti
     //json.printTo(buffer, sizeof(buffer));
     serializeJson(json, buffer, sizeof(buffer));
 
-    http.useHTTP10(true);
+    https.useHTTP10(true);
 
     char request[32];
     snprintf(request, 32, "%s%s", API_PATH, "/buy");
-    http.begin(*client_, SERVER_NAME, SERVER_PORT, request, false);
-    http.addHeader("Content-Type", "application/json");
-    int ret = http.POST(buffer);
+    https.begin(*client_, SERVER_NAME, SERVER_PORT, request, true);
+    https.addHeader("Content-Type", "application/json");
+    int ret = https.POST(buffer);
 
     if(ret != HTTP_CODE_OK) {
       Serial.print(F("/buy returned error ("));
@@ -51,7 +51,7 @@ bool HttpBuyTransaction::send(char* badge, char* productString, unsigned long ti
     }
 
     // Read response
-    DeserializationError deserialError = deserializeJson(jsonBuffer, http.getStream());
+    DeserializationError deserialError = deserializeJson(jsonBuffer, https.getStream());
     if (deserialError) {
         Serial.print(F("JSON error : deserializeJson() failed with code "));
         Serial.println(deserialError.c_str());
@@ -59,7 +59,7 @@ bool HttpBuyTransaction::send(char* badge, char* productString, unsigned long ti
         return false;
     }
     // Disconnect
-    http.end();
+    https.end();
 
     return true;
 }
@@ -82,19 +82,16 @@ bool HttpBuyTransaction::sendForBalance(char* badge, unsigned long time)
     json["Time"] = (const char*)timeString;
     serializeJson(json, buffer, sizeof(buffer));
 
-    Serial.print(F("/balance request json buffer usage : "));
-    Serial.println(jsonBuffer.memoryUsage());
-
     Serial.print(F("JSON request: "));
     Serial.println(buffer);
 
-    http.useHTTP10(true);
+    https.useHTTP10(true);
 
     char request[32];
     snprintf(request, 32, "%s%s", API_PATH, "/balance");
-    http.begin(*client_, SERVER_NAME, SERVER_PORT, request, false);
-    http.addHeader("Content-Type", "application/json");
-    int ret = http.POST(buffer);
+    https.begin(*client_, SERVER_NAME, SERVER_PORT, request, true);
+    https.addHeader("Content-Type", "application/json");
+    int ret = https.POST(buffer);
 
     if(ret != HTTP_CODE_OK) {
       Serial.print(F("/balance returned error ("));
@@ -105,7 +102,7 @@ bool HttpBuyTransaction::sendForBalance(char* badge, unsigned long time)
     }
     
     // Read response
-    DeserializationError deserialError = deserializeJson(jsonBuffer, http.getStream());
+    DeserializationError deserialError = deserializeJson(jsonBuffer, https.getStream());
     if (deserialError) {
         Serial.print(F("JSON error : deserializeJson() failed with code "));
         Serial.println(deserialError.c_str());
@@ -116,7 +113,7 @@ bool HttpBuyTransaction::sendForBalance(char* badge, unsigned long time)
     Serial.println(jsonBuffer.memoryUsage());
 
     // Disconnect
-    http.end();
+    https.end();
 
     return true;
 }
@@ -146,13 +143,13 @@ bool HttpBuyTransaction::add(char* badge, char* barcodeString, char* itemCount, 
     Serial.print("/add json buffer usage : ");
     Serial.println(jsonBuffer.memoryUsage());
 
-    http.useHTTP10(true); // needed to deserialize stream
+    https.useHTTP10(true); // needed to deserialize stream
 
     char request[32];
     snprintf(request, 32, "%s%s", API_PATH, "/add");
-    http.begin(*client_, SERVER_NAME, SERVER_PORT, request, false);
-    http.addHeader("Content-Type", "application/json");
-    int ret = http.POST(buffer);
+    https.begin(*client_, SERVER_NAME, SERVER_PORT, request, true);
+    https.addHeader("Content-Type", "application/json");
+    int ret = https.POST(buffer);
     
     if(ret != HTTP_CODE_OK) {
       Serial.print(F("/add returned error ("));
@@ -163,7 +160,7 @@ bool HttpBuyTransaction::add(char* badge, char* barcodeString, char* itemCount, 
     }
 
     // Read response
-    DeserializationError deserialError = deserializeJson(jsonBuffer, http.getStream());
+    DeserializationError deserialError = deserializeJson(jsonBuffer, https.getStream());
     if (deserialError) {
         Serial.print(F("JSON error : deserializeJson() failed with code "));
         Serial.println(deserialError.c_str());
@@ -176,7 +173,7 @@ bool HttpBuyTransaction::add(char* badge, char* barcodeString, char* itemCount, 
     //buffer[sizeof(buffer)-1] = '\0';
 
     // Disconnect
-    http.end();
+    https.end();
 
     return true;
 }

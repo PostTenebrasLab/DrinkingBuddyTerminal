@@ -10,13 +10,14 @@
 #define _HTTPBUYTRANSACTION_H
 
 #include <ESP8266HTTPClient.h>
+#include <WiFiClientSecure.h>
 
 class HttpBuyTransaction
 {
 public:
 
-    HttpBuyTransaction(WiFiClient& client)
-        :client_(&client)
+    HttpBuyTransaction(WiFiClientSecure* client)
+        :client_(client)
     {
        buffer[0] = '\0';
        hash_[0] = '\0';
@@ -55,9 +56,9 @@ private:
     bool parse();
     bool validate();
 
-    WiFiClient* client_;
+    WiFiClientSecure* client_;
     StaticJsonDocument<256> jsonBuffer;
-    HTTPClient http;
+    HTTPClient https;
     char buffer[256];
     char hash_[20];
     char messages_[2][32];

@@ -27,7 +27,8 @@ void Barcode::disable()
 
 void Barcode::flush()
 {
-  mySerial.flush();
+  while(mySerial.available())
+    mySerial.read();
 }
 
 int Barcode::available()
